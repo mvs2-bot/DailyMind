@@ -25,14 +25,3 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
 - Zugriff nur mit Freischaltung für die App `dailymind` (mindestens Rolle `member`
   in `overall_app_access`), wie bei den anderen Apps in „core“.
 - Die Rolle `anon` hat keinerlei Rechte auf die Tabelle.
-
-## Einrichtung
-
-Das Schema ist seit dem 20.10.2026 in „core“ angelegt, und `index.html` zeigt bereits auf „core“.
-
-1. Weitere User für `dailymind` freischalten, siehe Beispiel am Ende der SQL-Datei
-   (globale Admins haben automatisch Zugriff).
-2. In Supabase unter *Authentication → URL Configuration* die Pages-URL
-   `https://mvs2-bot.github.io/DailyMind/` als Redirect-URL erlauben
-   (für E-Mail-Bestätigung und Passwort-Reset).
-3. GitHub Pages für den Branch `main` aktivieren.
