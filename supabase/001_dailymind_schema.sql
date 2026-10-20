@@ -56,7 +56,7 @@ create table if not exists public.dailymind_entries (
 
     -- Abend
     went_well        text[]      not null default '{}',  -- Was lief heute gut? Kleine Erfolge (max. 3)
-    learned          text,                               -- Woraus habe ich gelernt? Was hätte besser laufen können?
+    learned          text,                               -- Was habe ich heute Gutes für jemanden getan?
     mood             smallint,                           -- Stimmung 1 (schwer) … 5 (strahlend)
     energy           smallint,                           -- Energie 1 (leer) … 5 (voller Energie)
     evening_done_at  timestamptz,
