@@ -1,1 +1,699 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>DailyMind</title>
+  <meta name="description" content="DailyMind – dein ruhiges Tagebuch für Dankbarkeit und Achtsamkeit.">
+  <meta name="theme-color" content="#F6F3EC" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#181B19" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%237C9A82'/><path d='M20 36c4 6 20 6 24 0' stroke='%23F6F3EC' stroke-width='4' fill='none' stroke-linecap='round'/></svg>">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Dark Mode vor dem ersten Rendern setzen, damit nichts aufblitzt -->
+  <script>
+    try {
+      const t = localStorage.getItem('dailymind-theme');
+      if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (_) {}
+  </script>
+
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            paper:  { DEFAULT: '#F6F3EC', dark: '#181B19' },
+            card:   { DEFAULT: '#FFFDF8', dark: '#212522' },
+            line:   { DEFAULT: '#E6E0D3', dark: '#2E3330' },
+            ink:    { DEFAULT: '#3B3A36', soft: '#7A766D', dark: '#E7E4DC', darksoft: '#9EA39C' },
+            sage:   { 50: '#EEF3EE', 100: '#DCE7DD', 300: '#A9C0AC', 500: '#7C9A82', 600: '#647F69', 700: '#4F6553' },
+            sand:   { 100: '#F1EADB', 300: '#E0D2B4', 500: '#C9A88A' },
+            dusk:   { 100: '#E8E6F1', 300: '#BDB7D6', 500: '#8E86B5' },
+          },
+          borderRadius: { '4xl': '2rem' },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    [x-cloak] { display: none !important; }
+    html { -webkit-font-smoothing: antialiased; }
+    body { transition: background-color .4s ease, color .4s ease; }
+    .field {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      padding: .6rem 0;
+      outline: none;
+      transition: border-color .2s ease;
+    }
+    .field:focus { border-bottom-color: #7C9A82; }
+    .field::placeholder { color: var(--placeholder); }
+    textarea.field { resize: none; line-height: 1.6; }
+    :root { --line: #E6E0D3; --placeholder: #B5AFA3; }
+    .dark { --line: #2E3330; --placeholder: #5F655F; }
+    input[type=range] { accent-color: #7C9A82; }
+    .fade-enter { animation: fade .35s ease both; }
+    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+</head>
+
+<body class="min-h-screen bg-paper text-ink dark:bg-paper-dark dark:text-ink-dark font-sans font-light" x-data="dailyMind()">
+
+<!-- ================================================================ -->
+<!-- Konfiguration                                                      -->
+<!-- ================================================================ -->
+<script>
+  const SUPABASE_URL      = 'https://YOUR-PROJECT.supabase.co';  // Projekt "core": Settings → API → Project URL
+  const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';                      // Settings → API → anon / publishable key
+  const APP_ID            = 'dailymind';                          // Eintrag in public.overall_apps
+</script>
+
+<div class="mx-auto max-w-xl px-5 sm:px-6 pb-24">
+
+  <!-- Kopfzeile -->
+  <header class="flex items-center justify-between py-8">
+    <div class="flex items-center gap-3">
+      <span class="h-2.5 w-2.5 rounded-full bg-sage-500"></span>
+      <span class="font-serif text-xl tracking-tight">DailyMind</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button @click="toggleTheme()" class="rounded-full p-2 text-ink-soft hover:bg-line/60 dark:text-ink-darksoft dark:hover:bg-line-dark" :aria-label="dark ? 'Helles Design' : 'Dunkles Design'">
+        <svg x-show="!dark" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        <svg x-show="dark" x-cloak class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button x-show="view === 'app' || view === 'noaccess'" x-cloak @click="signOut()" class="rounded-full px-3 py-2 text-sm text-ink-soft hover:bg-line/60 dark:text-ink-darksoft dark:hover:bg-line-dark">Abmelden</button>
+    </div>
+  </header>
+
+  <!-- Laden -->
+  <section x-show="view === 'loading'" class="py-32 text-center text-ink-soft dark:text-ink-darksoft">
+    <div class="mx-auto h-2 w-2 animate-ping rounded-full bg-sage-500"></div>
+  </section>
+
+  <!-- Konfiguration fehlt -->
+  <section x-show="view === 'config'" x-cloak class="fade-enter rounded-4xl bg-card p-8 shadow-sm dark:bg-card-dark">
+    <h1 class="font-serif text-2xl">Fast geschafft</h1>
+    <p class="mt-3 text-ink-soft dark:text-ink-darksoft">Trage im Konfigurationsblock oben in <code class="rounded bg-sand-100 px-1.5 py-0.5 text-sm dark:bg-line-dark">index.html</code> die Supabase-URL und den Anon-Key deines Projekts „core“ ein.</p>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- Login / Registrierung                                           -->
+  <!-- ============================================================== -->
+  <section x-show="view === 'auth'" x-cloak class="fade-enter pt-6">
+    <h1 class="font-serif text-4xl font-light leading-tight tracking-tight" x-text="authTitle()"></h1>
+    <p class="mt-3 text-ink-soft dark:text-ink-darksoft" x-show="authMode !== 'recover'">Sechs ruhige Minuten am Tag. Für Dankbarkeit, Klarheit und einen freundlichen Blick auf dich selbst.</p>
+
+    <form @submit.prevent="submitAuth()" class="mt-10 space-y-6">
+      <div x-show="authMode === 'register'">
+        <label class="text-xs uppercase tracking-widest text-ink-soft dark:text-ink-darksoft">Name</label>
+        <input type="text" x-model="form.name" autocomplete="nickname" class="field" placeholder="Wie dürfen wir dich nennen?">
+      </div>
+      <div x-show="authMode !== 'recover'">
+        <label class="text-xs uppercase tracking-widest text-ink-soft dark:text-ink-darksoft">E-Mail</label>
+        <input type="email" x-model="form.email" :required="authMode !== 'recover'" autocomplete="email" class="field" placeholder="du@beispiel.de">
+      </div>
+      <div x-show="authMode !== 'reset'">
+        <label class="text-xs uppercase tracking-widest text-ink-soft dark:text-ink-darksoft" x-text="authMode === 'recover' ? 'Neues Passwort' : 'Passwort'"></label>
+        <input type="password" x-model="form.password" :required="authMode !== 'reset'" minlength="8" :autocomplete="authMode === 'login' ? 'current-password' : 'new-password'" class="field" placeholder="Mindestens 8 Zeichen">
+      </div>
+
+      <p x-show="auth.error" x-text="auth.error" class="rounded-2xl bg-sand-100 px-4 py-3 text-sm text-ink dark:bg-line-dark dark:text-ink-dark"></p>
+      <p x-show="auth.info" x-text="auth.info" class="rounded-2xl bg-sage-50 px-4 py-3 text-sm text-sage-700 dark:bg-sage-700/20 dark:text-sage-300"></p>
+
+      <button type="submit" :disabled="auth.busy" class="w-full rounded-full bg-sage-500 py-3.5 font-normal text-white transition hover:bg-sage-600 disabled:opacity-50" x-text="authButton()"></button>
+    </form>
+
+    <div class="mt-8 flex flex-col items-center gap-2 text-sm text-ink-soft dark:text-ink-darksoft">
+      <button x-show="authMode === 'login'" @click="switchAuth('register')" class="hover:text-sage-600">Noch kein Konto? <span class="underline underline-offset-4">Registrieren</span></button>
+      <button x-show="authMode === 'login'" @click="switchAuth('reset')" class="hover:text-sage-600">Passwort vergessen?</button>
+      <button x-show="authMode === 'register' || authMode === 'reset'" @click="switchAuth('login')" class="hover:text-sage-600">Zurück zur <span class="underline underline-offset-4">Anmeldung</span></button>
+    </div>
+  </section>
+
+  <!-- Kein Zugriff -->
+  <section x-show="view === 'noaccess'" x-cloak class="fade-enter rounded-4xl bg-card p-8 shadow-sm dark:bg-card-dark">
+    <h1 class="font-serif text-2xl">Noch nicht freigeschaltet</h1>
+    <p class="mt-3 leading-relaxed text-ink-soft dark:text-ink-darksoft">Dein Konto <span class="text-ink dark:text-ink-dark" x-text="user?.email"></span> ist angelegt, hat aber noch keinen Zugriff auf DailyMind. Sobald ein Admin dich freischaltet, kannst du hier direkt loslegen.</p>
+    <button @click="checkAccess()" class="mt-6 rounded-full border border-line px-5 py-2.5 text-sm hover:border-sage-500 dark:border-line-dark">Erneut prüfen</button>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- App                                                             -->
+  <!-- ============================================================== -->
+  <main x-show="view === 'app'" x-cloak>
+
+    <!-- Navigation -->
+    <nav class="mb-10 flex rounded-full bg-line/50 p-1 text-sm dark:bg-line-dark/70">
+      <button @click="tab = 'today'" :class="tab === 'today' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="flex-1 rounded-full py-2 transition">Tagebuch</button>
+      <button @click="openArchive()" :class="tab === 'archive' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="flex-1 rounded-full py-2 transition">Archiv</button>
+    </nav>
+
+    <!-- -------------------------- Tagebuch -------------------------- -->
+    <section x-show="tab === 'today'" class="fade-enter">
+
+      <!-- Datum -->
+      <div class="flex items-center justify-between">
+        <button @click="shiftDay(-1)" class="rounded-full p-2 text-ink-soft hover:bg-line/60 dark:text-ink-darksoft dark:hover:bg-line-dark" aria-label="Vorheriger Tag">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="text-center">
+          <p class="text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="weekday(date)"></p>
+          <h2 class="mt-1 font-serif text-3xl font-light tracking-tight" x-text="longDate(date)"></h2>
+          <button x-show="date !== today()" @click="goTo(today())" class="mt-1 text-xs text-sage-600 hover:underline dark:text-sage-300">Zu heute</button>
+        </div>
+        <button @click="shiftDay(1)" :disabled="date >= today()" class="rounded-full p-2 text-ink-soft hover:bg-line/60 disabled:opacity-20 dark:text-ink-darksoft dark:hover:bg-line-dark" aria-label="Nächster Tag">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- Morgen / Abend -->
+      <div class="mx-auto mt-8 flex w-fit gap-6 text-sm">
+        <button @click="part = 'morning'" class="flex items-center gap-2 border-b pb-1 transition" :class="part === 'morning' ? 'border-sand-500 text-ink dark:text-ink-dark' : 'border-transparent text-ink-soft dark:text-ink-darksoft'">
+          <span>☀︎</span> Morgen <span x-show="entry.morning_done_at" class="h-1.5 w-1.5 rounded-full bg-sand-500"></span>
+        </button>
+        <button @click="part = 'evening'" class="flex items-center gap-2 border-b pb-1 transition" :class="part === 'evening' ? 'border-dusk-500 text-ink dark:text-ink-dark' : 'border-transparent text-ink-soft dark:text-ink-darksoft'">
+          <span>☾</span> Abend <span x-show="entry.evening_done_at" class="h-1.5 w-1.5 rounded-full bg-dusk-500"></span>
+        </button>
+      </div>
+
+      <div x-show="loadingEntry" class="py-20 text-center"><div class="mx-auto h-2 w-2 animate-ping rounded-full bg-sage-500"></div></div>
+
+      <!-- Morgenroutine -->
+      <div x-show="!loadingEntry && part === 'morning'" class="fade-enter mt-8 space-y-6">
+        <article class="rounded-4xl bg-card p-7 shadow-sm dark:bg-card-dark">
+          <h3 class="font-serif text-lg">Wofür bin ich heute dankbar?</h3>
+          <template x-for="(_, i) in entry.gratitude" :key="'g' + i">
+            <div class="flex items-baseline gap-3">
+              <span class="w-4 text-sm text-sand-500" x-text="i + 1"></span>
+              <input type="text" maxlength="500" x-model="entry.gratitude[i]" @input="queueSave()" class="field" placeholder="…">
+            </div>
+          </template>
+        </article>
+
+        <article class="rounded-4xl bg-card p-7 shadow-sm dark:bg-card-dark">
+          <h3 class="font-serif text-lg">Was würde den heutigen Tag großartig machen?</h3>
+          <template x-for="(_, i) in entry.great_day" :key="'d' + i">
+            <div class="flex items-baseline gap-3">
+              <span class="w-4 text-sm text-sand-500" x-text="i + 1"></span>
+              <input type="text" maxlength="500" x-model="entry.great_day[i]" @input="queueSave()" class="field" placeholder="…">
+            </div>
+          </template>
+        </article>
+
+        <article class="rounded-4xl bg-sand-100/70 p-7 dark:bg-card-dark">
+          <h3 class="font-serif text-lg">Positive Affirmation</h3>
+          <p class="mt-1 text-sm text-ink-soft dark:text-ink-darksoft">Ein Satz, der dich heute trägt.</p>
+          <textarea rows="2" maxlength="500" x-model="entry.affirmation" @input="queueSave()" class="field mt-2 font-serif text-xl italic" placeholder="Ich bin ruhig, klar und offen für das, was kommt."></textarea>
+        </article>
+      </div>
+
+      <!-- Abendroutine -->
+      <div x-show="!loadingEntry && part === 'evening'" x-cloak class="fade-enter mt-8 space-y-6">
+        <article class="rounded-4xl bg-card p-7 shadow-sm dark:bg-card-dark">
+          <h3 class="font-serif text-lg">Was lief heute gut?</h3>
+          <p class="mt-1 text-sm text-ink-soft dark:text-ink-darksoft">Kleine Erfolge zählen doppelt.</p>
+          <template x-for="(_, i) in entry.went_well" :key="'w' + i">
+            <div class="flex items-baseline gap-3">
+              <span class="w-4 text-sm text-dusk-500" x-text="i + 1"></span>
+              <input type="text" maxlength="500" x-model="entry.went_well[i]" @input="queueSave()" class="field" placeholder="…">
+            </div>
+          </template>
+        </article>
+
+        <article class="rounded-4xl bg-card p-7 shadow-sm dark:bg-card-dark">
+          <h3 class="font-serif text-lg">Woraus habe ich heute gelernt?</h3>
+          <p class="mt-1 text-sm text-ink-soft dark:text-ink-darksoft">Was hätte besser laufen können?</p>
+          <textarea rows="3" maxlength="2000" x-model="entry.learned" @input="queueSave()" class="field mt-2" placeholder="…"></textarea>
+        </article>
+
+        <article class="rounded-4xl bg-dusk-100/60 p-7 dark:bg-card-dark">
+          <h3 class="font-serif text-lg">Wie war dein Tag?</h3>
+          <div class="mt-5 flex justify-between">
+            <template x-for="m in moods" :key="m.value">
+              <button @click="entry.mood = entry.mood === m.value ? null : m.value; queueSave()" :title="m.label"
+                      class="flex flex-col items-center gap-1.5 rounded-2xl px-2 py-2 transition"
+                      :class="entry.mood === m.value ? 'bg-card shadow-sm dark:bg-line-dark' : 'opacity-50 hover:opacity-90'">
+                <span class="text-2xl" x-text="m.icon"></span>
+                <span class="text-[11px] text-ink-soft dark:text-ink-darksoft" x-text="m.label"></span>
+              </button>
+            </template>
+          </div>
+
+          <div class="mt-8">
+            <div class="flex items-center justify-between text-sm">
+              <span>Energie</span>
+              <span class="text-ink-soft dark:text-ink-darksoft" x-text="entry.energy ? energyLabels[entry.energy - 1] : 'noch offen'"></span>
+            </div>
+            <input type="range" min="1" max="5" step="1" :value="entry.energy ?? 3" @input="entry.energy = +$event.target.value; queueSave()" class="mt-3 w-full" :class="entry.energy ? '' : 'opacity-40'">
+            <div class="mt-1 flex justify-between text-[11px] text-ink-soft dark:text-ink-darksoft"><span>leer</span><span>voller Energie</span></div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Speicherstatus -->
+      <p class="mt-8 text-center text-xs text-ink-soft dark:text-ink-darksoft" x-text="saveStatus()"></p>
+    </section>
+
+    <!-- --------------------------- Archiv --------------------------- -->
+    <section x-show="tab === 'archive'" x-cloak class="fade-enter">
+      <div class="flex items-center justify-between">
+        <h2 class="font-serif text-3xl font-light tracking-tight">Archiv</h2>
+        <div class="flex rounded-full bg-line/50 p-1 text-xs dark:bg-line-dark/70">
+          <button @click="archiveMode = 'list'" :class="archiveMode === 'list' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="rounded-full px-3 py-1.5">Liste</button>
+          <button @click="archiveMode = 'calendar'" :class="archiveMode === 'calendar' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="rounded-full px-3 py-1.5">Kalender</button>
+        </div>
+      </div>
+
+      <div x-show="archiveLoading" class="py-20 text-center"><div class="mx-auto h-2 w-2 animate-ping rounded-full bg-sage-500"></div></div>
+
+      <p x-show="!archiveLoading && archive.length === 0" class="py-20 text-center text-ink-soft dark:text-ink-darksoft">Noch keine Einträge. Dein erster wartet unter „Tagebuch“.</p>
+
+      <!-- Liste -->
+      <div x-show="!archiveLoading && archiveMode === 'list'" class="mt-8 space-y-10">
+        <template x-for="group in archiveByMonth()" :key="group.key">
+          <div>
+            <p class="mb-3 text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="group.label"></p>
+            <div class="space-y-3">
+              <template x-for="e in group.entries" :key="e.id">
+                <button @click="goTo(e.entry_date)" class="block w-full rounded-3xl bg-card p-5 text-left shadow-sm transition hover:shadow-md dark:bg-card-dark">
+                  <div class="flex items-center justify-between">
+                    <span class="font-serif" x-text="shortDate(e.entry_date)"></span>
+                    <span class="flex items-center gap-2">
+                      <span x-show="e.morning_done_at" class="h-1.5 w-1.5 rounded-full bg-sand-500" title="Morgen"></span>
+                      <span x-show="e.evening_done_at" class="h-1.5 w-1.5 rounded-full bg-dusk-500" title="Abend"></span>
+                      <span x-show="e.mood" x-text="moodIcon(e.mood)"></span>
+                    </span>
+                  </div>
+                  <p x-show="e.affirmation" class="mt-2 font-serif italic text-ink-soft dark:text-ink-darksoft" x-text="'„' + e.affirmation + '“'"></p>
+                  <p x-show="!e.affirmation && firstFilled(e)" class="mt-2 truncate text-sm text-ink-soft dark:text-ink-darksoft" x-text="firstFilled(e)"></p>
+                </button>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Kalender -->
+      <div x-show="!archiveLoading && archiveMode === 'calendar'" x-cloak class="mt-8 rounded-4xl bg-card p-6 shadow-sm dark:bg-card-dark">
+        <div class="flex items-center justify-between">
+          <button @click="shiftMonth(-1)" class="rounded-full p-2 text-ink-soft hover:bg-line/60 dark:text-ink-darksoft dark:hover:bg-line-dark" aria-label="Vorheriger Monat">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <span class="font-serif text-lg" x-text="monthLabel(calMonth)"></span>
+          <button @click="shiftMonth(1)" class="rounded-full p-2 text-ink-soft hover:bg-line/60 dark:text-ink-darksoft dark:hover:bg-line-dark" aria-label="Nächster Monat">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="mt-4 grid grid-cols-7 text-center text-[11px] uppercase tracking-wider text-ink-soft dark:text-ink-darksoft">
+          <template x-for="d in ['Mo','Di','Mi','Do','Fr','Sa','So']"><span class="py-2" x-text="d"></span></template>
+        </div>
+        <div class="grid grid-cols-7 gap-1">
+          <template x-for="cell in calendarCells()" :key="cell.key">
+            <button :disabled="!cell.iso || cell.iso > today()" @click="goTo(cell.iso)"
+                    class="flex aspect-square flex-col items-center justify-center rounded-2xl text-sm transition disabled:cursor-default"
+                    :class="[
+                      cell.iso === today() ? 'ring-1 ring-sage-500' : '',
+                      cell.entry ? 'bg-sage-50 hover:bg-sage-100 dark:bg-sage-700/20 dark:hover:bg-sage-700/30' : 'hover:bg-line/50 dark:hover:bg-line-dark',
+                      cell.iso && cell.iso > today() ? 'opacity-30' : ''
+                    ]">
+              <span x-text="cell.day"></span>
+              <span class="mt-1 flex h-1.5 gap-0.5">
+                <span x-show="cell.entry?.morning_done_at" class="h-1 w-1 rounded-full bg-sand-500"></span>
+                <span x-show="cell.entry?.evening_done_at" class="h-1 w-1 rounded-full bg-dusk-500"></span>
+              </span>
+            </button>
+          </template>
+        </div>
+        <div class="mt-5 flex justify-center gap-5 text-[11px] text-ink-soft dark:text-ink-darksoft">
+          <span class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-sand-500"></span>Morgen</span>
+          <span class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-dusk-500"></span>Abend</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  // ================================================================
+  // Hilfsfunktionen für Datum (immer lokale Zeit, nie UTC)
+  // ================================================================
+  const pad = n => String(n).padStart(2, '0');
+  const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const fromISO = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const fmt = (s, opts) => new Intl.DateTimeFormat('de-DE', opts).format(fromISO(s));
+
+  const emptyEntry = () => ({
+    gratitude: ['', '', ''],
+    great_day: ['', '', ''],
+    affirmation: '',
+    went_well: ['', '', ''],
+    learned: '',
+    mood: null,
+    energy: null,
+    morning_done_at: null,
+    evening_done_at: null,
+  });
+  const padTo3 = a => [...(a || []), '', '', ''].slice(0, 3);
+  const clean = a => a.map(s => s.trim()).filter(Boolean);
+
+  function dailyMind() {
+    return {
+      sb: null,
+      view: 'loading',            // loading | config | auth | noaccess | app
+      dark: document.documentElement.classList.contains('dark'),
+      user: null,
+
+      // Auth
+      authMode: 'login',          // login | register | reset | recover
+      form: { name: '', email: '', password: '' },
+      auth: { busy: false, error: '', info: '' },
+
+      // Tagebuch
+      tab: 'today',
+      part: new Date().getHours() < 15 ? 'morning' : 'evening',
+      date: toISO(new Date()),
+      entry: emptyEntry(),
+      loadingEntry: false,
+      saveState: 'idle',          // idle | pending | saving | saved | error
+      saveTimer: null,
+
+      // Archiv
+      archive: [],
+      archiveLoading: false,
+      archiveMode: 'list',
+      calMonth: toISO(new Date()).slice(0, 7),
+
+      moods: [
+        { value: 1, icon: '🌧', label: 'schwer' },
+        { value: 2, icon: '☁️', label: 'trüb' },
+        { value: 3, icon: '⛅', label: 'okay' },
+        { value: 4, icon: '🌤', label: 'gut' },
+        { value: 5, icon: '☀️', label: 'strahlend' },
+      ],
+      energyLabels: ['sehr niedrig', 'niedrig', 'mittel', 'hoch', 'voller Energie'],
+
+      // ------------------------------------------------------------
+      // Start
+      // ------------------------------------------------------------
+      async init() {
+        if (SUPABASE_URL.includes('YOUR-PROJECT') || SUPABASE_ANON_KEY.includes('YOUR-ANON-KEY')) {
+          this.view = 'config';
+          return;
+        }
+        this.sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        this.sb.auth.onAuthStateChange((event, session) => {
+          if (event === 'PASSWORD_RECOVERY') {
+            this.user = session?.user ?? null;
+            this.switchAuth('recover');
+            this.view = 'auth';
+            return;
+          }
+          if (event === 'SIGNED_OUT') { this.reset(); return; }
+          if (event === 'SIGNED_IN' && session && this.user?.id !== session.user.id) {
+            this.user = session.user;
+            // Außerhalb des Auth-Callbacks weiterarbeiten (Supabase-Empfehlung)
+            setTimeout(() => this.checkAccess(), 0);
+          }
+        });
+
+        const { data: { session } } = await this.sb.auth.getSession();
+        if (session && this.authMode !== 'recover') {
+          this.user = session.user;
+          await this.checkAccess();
+        } else if (this.authMode !== 'recover') {
+          this.view = 'auth';
+        }
+
+        // Ungespeicherte Änderungen beim Verlassen sichern
+        window.addEventListener('beforeunload', () => { if (this.saveState === 'pending') this.save(); });
+      },
+
+      reset() {
+        this.user = null;
+        this.entry = emptyEntry();
+        this.archive = [];
+        this.tab = 'today';
+        this.form.password = '';
+        this.switchAuth('login');
+        this.view = 'auth';
+      },
+
+      async checkAccess() {
+        const { data, error } = await this.sb.rpc('dailymind_is_member');
+        if (error) { console.error(error); }
+        if (data === true) {
+          this.view = 'app';
+          await this.loadEntry();
+        } else {
+          this.view = 'noaccess';
+        }
+      },
+
+      // ------------------------------------------------------------
+      // Authentifizierung
+      // ------------------------------------------------------------
+      authTitle() {
+        return { login: 'Willkommen zurück.', register: 'Schön, dass du da bist.', reset: 'Passwort zurücksetzen', recover: 'Neues Passwort' }[this.authMode];
+      },
+      authButton() {
+        if (this.auth.busy) return 'Einen Moment …';
+        return { login: 'Anmelden', register: 'Konto erstellen', reset: 'Link senden', recover: 'Passwort speichern' }[this.authMode];
+      },
+      switchAuth(mode) {
+        this.authMode = mode;
+        this.auth.error = '';
+        this.auth.info = '';
+      },
+
+      async submitAuth() {
+        this.auth.busy = true;
+        this.auth.error = '';
+        this.auth.info = '';
+        const redirectTo = location.origin + location.pathname;
+        try {
+          if (this.authMode === 'login') {
+            const { error } = await this.sb.auth.signInWithPassword({ email: this.form.email, password: this.form.password });
+            if (error) throw error;
+          } else if (this.authMode === 'register') {
+            const { data, error } = await this.sb.auth.signUp({
+              email: this.form.email,
+              password: this.form.password,
+              options: { data: { display_name: this.form.name.trim() || undefined }, emailRedirectTo: redirectTo },
+            });
+            if (error) throw error;
+            if (!data.session) {
+              this.switchAuth('login');
+              this.auth.info = 'Fast fertig: Bitte bestätige deine E-Mail-Adresse über den Link in deinem Postfach.';
+            }
+          } else if (this.authMode === 'reset') {
+            const { error } = await this.sb.auth.resetPasswordForEmail(this.form.email, { redirectTo });
+            if (error) throw error;
+            this.auth.info = 'Wenn ein Konto existiert, ist der Link unterwegs.';
+          } else if (this.authMode === 'recover') {
+            const { error } = await this.sb.auth.updateUser({ password: this.form.password });
+            if (error) throw error;
+            this.form.password = '';
+            this.switchAuth('login');
+            await this.checkAccess();
+          }
+        } catch (e) {
+          this.auth.error = this.translateError(e);
+        } finally {
+          this.auth.busy = false;
+        }
+      },
+
+      translateError(e) {
+        const msg = e?.message || String(e);
+        if (/invalid login credentials/i.test(msg)) return 'E-Mail oder Passwort stimmen nicht.';
+        if (/email not confirmed/i.test(msg)) return 'Bitte bestätige zuerst deine E-Mail-Adresse.';
+        if (/already registered/i.test(msg)) return 'Für diese E-Mail gibt es bereits ein Konto.';
+        if (/password should be at least/i.test(msg)) return 'Das Passwort ist zu kurz.';
+        if (/rate limit/i.test(msg)) return 'Zu viele Versuche. Bitte warte einen Moment.';
+        return msg;
+      },
+
+      async signOut() {
+        if (this.saveState === 'pending') await this.save();
+        await this.sb.auth.signOut();
+      },
+
+      // ------------------------------------------------------------
+      // Eintrag laden und speichern
+      // ------------------------------------------------------------
+      async loadEntry() {
+        this.loadingEntry = true;
+        const { data, error } = await this.sb
+          .from('dailymind_entries')
+          .select('*')
+          .eq('entry_date', this.date)
+          .maybeSingle();
+        this.loadingEntry = false;
+        if (error) { console.error(error); this.saveState = 'error'; return; }
+        const e = data || {};
+        this.entry = {
+          ...emptyEntry(),
+          ...e,
+          gratitude: padTo3(e.gratitude),
+          great_day: padTo3(e.great_day),
+          went_well: padTo3(e.went_well),
+          affirmation: e.affirmation || '',
+          learned: e.learned || '',
+        };
+        this.saveState = 'idle';
+      },
+
+      queueSave() {
+        this.saveState = 'pending';
+        clearTimeout(this.saveTimer);
+        this.saveTimer = setTimeout(() => this.save(), 900);
+      },
+
+      async save() {
+        clearTimeout(this.saveTimer);
+        const e = this.entry;
+        const now = new Date().toISOString();
+        const morningFilled = clean(e.gratitude).length || clean(e.great_day).length || e.affirmation.trim();
+        const eveningFilled = clean(e.went_well).length || e.learned.trim() || e.mood || e.energy;
+
+        const row = {
+          user_id: this.user.id,
+          entry_date: this.date,
+          gratitude: clean(e.gratitude),
+          great_day: clean(e.great_day),
+          affirmation: e.affirmation.trim() || null,
+          went_well: clean(e.went_well),
+          learned: e.learned.trim() || null,
+          mood: e.mood,
+          energy: e.energy,
+          morning_done_at: morningFilled ? (e.morning_done_at || now) : null,
+          evening_done_at: eveningFilled ? (e.evening_done_at || now) : null,
+        };
+
+        this.saveState = 'saving';
+        const { data, error } = await this.sb
+          .from('dailymind_entries')
+          .upsert(row, { onConflict: 'user_id,entry_date' })
+          .select('id, morning_done_at, evening_done_at, updated_at')
+          .single();
+        if (error) { console.error(error); this.saveState = 'error'; return; }
+        // Nur Metadaten übernehmen, damit laufende Eingaben nicht überschrieben werden
+        Object.assign(this.entry, data);
+        if (this.saveState === 'saving') this.saveState = 'saved';
+        this.upsertArchive({ ...row, ...data });
+      },
+
+      saveStatus() {
+        return { idle: '', pending: 'Änderungen …', saving: 'Speichert …', saved: 'Gespeichert', error: 'Speichern fehlgeschlagen. Bitte prüfe deine Verbindung.' }[this.saveState];
+      },
+
+      async goTo(iso) {
+        if (this.saveState === 'pending') await this.save();
+        this.date = iso;
+        this.tab = 'today';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        await this.loadEntry();
+      },
+      shiftDay(n) {
+        const d = fromISO(this.date);
+        d.setDate(d.getDate() + n);
+        const iso = toISO(d);
+        if (iso <= this.today()) this.goTo(iso);
+      },
+
+      // ------------------------------------------------------------
+      // Archiv
+      // ------------------------------------------------------------
+      async openArchive() {
+        if (this.saveState === 'pending') await this.save();
+        this.tab = 'archive';
+        this.archiveLoading = this.archive.length === 0;
+        const { data, error } = await this.sb
+          .from('dailymind_entries')
+          .select('id, entry_date, gratitude, great_day, affirmation, went_well, mood, energy, morning_done_at, evening_done_at')
+          .order('entry_date', { ascending: false })
+          .limit(1000);
+        this.archiveLoading = false;
+        if (error) { console.error(error); return; }
+        this.archive = data;
+      },
+      upsertArchive(row) {
+        if (!this.archive.length) return;
+        const i = this.archive.findIndex(a => a.entry_date === row.entry_date);
+        if (i >= 0) this.archive[i] = { ...this.archive[i], ...row };
+        else this.archive = [row, ...this.archive].sort((a, b) => b.entry_date.localeCompare(a.entry_date));
+      },
+      archiveByMonth() {
+        const groups = [];
+        for (const e of this.archive) {
+          const key = e.entry_date.slice(0, 7);
+          let g = groups[groups.length - 1];
+          if (!g || g.key !== key) groups.push(g = { key, label: this.monthLabel(key), entries: [] });
+          g.entries.push(e);
+        }
+        return groups;
+      },
+      firstFilled(e) {
+        return (e.gratitude || [])[0] || (e.went_well || [])[0] || (e.great_day || [])[0] || '';
+      },
+
+      // Kalender
+      shiftMonth(n) {
+        const [y, m] = this.calMonth.split('-').map(Number);
+        const d = new Date(y, m - 1 + n, 1);
+        this.calMonth = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+      },
+      calendarCells() {
+        const [y, m] = this.calMonth.split('-').map(Number);
+        const first = new Date(y, m - 1, 1);
+        const days = new Date(y, m, 0).getDate();
+        const offset = (first.getDay() + 6) % 7;  // Woche beginnt am Montag
+        const byDate = Object.fromEntries(this.archive.map(e => [e.entry_date, e]));
+        const cells = [];
+        for (let i = 0; i < offset; i++) cells.push({ key: 'b' + i, iso: null, day: '' });
+        for (let d = 1; d <= days; d++) {
+          const iso = `${this.calMonth}-${pad(d)}`;
+          cells.push({ key: iso, iso, day: d, entry: byDate[iso] });
+        }
+        return cells;
+      },
+
+      // ------------------------------------------------------------
+      // Darstellung
+      // ------------------------------------------------------------
+      today: () => toISO(new Date()),
+      weekday: s => fmt(s, { weekday: 'long' }),
+      longDate: s => fmt(s, { day: 'numeric', month: 'long' }),
+      shortDate: s => fmt(s, { weekday: 'short', day: 'numeric', month: 'long' }),
+      monthLabel: ym => fmt(ym + '-01', { month: 'long', year: 'numeric' }),
+      moodIcon(v) { return this.moods.find(m => m.value === v)?.icon || ''; },
+
+      toggleTheme() {
+        this.dark = !this.dark;
+        document.documentElement.classList.toggle('dark', this.dark);
+        try { localStorage.setItem('dailymind-theme', this.dark ? 'dark' : 'light'); } catch (_) {}
+      },
+    };
+  }
+</script>
+</body>
+</html>
