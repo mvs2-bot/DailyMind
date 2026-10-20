@@ -28,10 +28,11 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
 
 ## Einrichtung
 
-1. `supabase/001_dailymind_schema.sql` im SQL-Editor des Projekts „core“ ausführen (idempotent).
-2. Sich selbst (bzw. weitere User) für `dailymind` freischalten, siehe Beispiel am Ende der SQL-Datei.
-3. In `index.html` `SUPABASE_URL` und `SUPABASE_ANON_KEY` eintragen.
-4. In Supabase unter *Authentication → URL Configuration* die Pages-URL
+Das Schema ist seit dem 20.10.2026 in „core“ angelegt, und `index.html` zeigt bereits auf „core“.
+
+1. Weitere User für `dailymind` freischalten, siehe Beispiel am Ende der SQL-Datei
+   (globale Admins haben automatisch Zugriff).
+2. In Supabase unter *Authentication → URL Configuration* die Pages-URL
    `https://mvs2-bot.github.io/DailyMind/` als Redirect-URL erlauben
    (für E-Mail-Bestätigung und Passwort-Reset).
-5. GitHub Pages für den Branch `main` aktivieren.
+3. GitHub Pages für den Branch `main` aktivieren.

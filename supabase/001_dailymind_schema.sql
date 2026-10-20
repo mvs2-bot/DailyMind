@@ -100,6 +100,8 @@ alter table public.dailymind_entries enable row level security;
 alter table public.dailymind_entries force row level security;
 
 revoke all on table public.dailymind_entries from anon;
+-- TRUNCATE umgeht RLS, daher nur die vier DML-Rechte für eingeloggte User
+revoke truncate, references, trigger on table public.dailymind_entries from authenticated;
 grant select, insert, update, delete on table public.dailymind_entries to authenticated;
 
 drop policy if exists dailymind_entries_select on public.dailymind_entries;
