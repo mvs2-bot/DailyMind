@@ -34,3 +34,12 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
   ⚙️ Kontoeinstellungen (`/konto.html`), 🛡️ Admin-Einstellungen (nur für Admins) und 🚪 Abmelden.
 - Anzeigename und Profilbild kommen aus dem gemeinsamen Profil `overall_profiles`, Hell/Dunkel aus
   dem gemeinsamen Schlüssel `overall-theme`.
+
+## Tagesablauf
+
+- Oben läuft die aktuelle Uhrzeit (mit Sekunden) und das Datum mit Wochentag.
+- Ab 15 Uhr öffnet die App direkt mit der Abendroutine, davor mit der Morgenroutine
+  (`EVENING_FROM_HOUR` in `index.html`). Das gilt beim Öffnen, nach dem Login und wenn man
+  später zur offenen App zurückkehrt.
+- Sind alle Felder einer Routine ausgefüllt, erscheint darunter ein Kompliment. Pro Tag und Routine
+  bleibt es dasselbe, damit es beim Tippen nicht wechselt.

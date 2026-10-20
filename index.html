@@ -192,6 +192,12 @@
   <!-- ============================================================== -->
   <main x-show="view === 'app'" x-cloak>
 
+    <!-- Aktuelle Uhrzeit und Datum -->
+    <div class="mb-8 text-center" aria-live="off">
+      <p class="font-serif text-5xl font-light tracking-tight tabular-nums" x-text="clockTime()"></p>
+      <p class="mt-2 text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="clockDate()"></p>
+    </div>
+
     <!-- Navigation -->
     <nav class="mb-10 flex rounded-full bg-line/50 p-1 text-sm dark:bg-line-dark/70">
       <button @click="tab = 'today'" :class="tab === 'today' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="flex-1 rounded-full py-2 transition">Tagebuch</button>
@@ -207,7 +213,7 @@
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>
         </button>
         <div class="text-center">
-          <p class="text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="weekday(date)"></p>
+          <p class="text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="date === today() ? 'Heute' : weekday(date)"></p>
           <h2 class="mt-1 font-serif text-3xl font-light tracking-tight" x-text="longDate(date)"></h2>
           <button x-show="date !== today()" @click="goTo(today())" class="mt-1 text-xs text-sage-600 hover:underline dark:text-sage-300">Zu heute</button>
         </div>
@@ -298,6 +304,14 @@
             <div class="mt-1 flex justify-between text-[11px] text-ink-soft dark:text-ink-darksoft"><span>leer</span><span>voller Energie</span></div>
           </div>
         </article>
+      </div>
+
+      <!-- Kompliment, sobald alle Felder der Routine ausgefüllt sind -->
+      <div x-show="!loadingEntry && complete(part)" x-cloak x-transition:enter="transition duration-700 ease-out" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+           class="mt-8 rounded-4xl p-7 text-center" :class="part === 'morning' ? 'bg-sage-50 dark:bg-sage-700/20' : 'bg-dusk-100/60 dark:bg-dusk-500/15'">
+        <p class="text-2xl" x-text="part === 'morning' ? '🌱' : '🌙'"></p>
+        <p class="mt-2 font-serif text-xl" x-text="compliment(part).title"></p>
+        <p class="mt-1 text-sm text-ink-soft dark:text-ink-darksoft" x-text="compliment(part).text"></p>
       </div>
 
       <!-- Speicherstatus -->
@@ -403,6 +417,27 @@
     morning_done_at: null,
     evening_done_at: null,
   });
+  // Ab dieser Stunde öffnet die App direkt mit der Abendroutine
+  const EVENING_FROM_HOUR = 15;
+  const autoPart = () => new Date().getHours() >= EVENING_FROM_HOUR ? 'evening' : 'morning';
+
+  const COMPLIMENTS = {
+    morning: [
+      { title: 'Super gemacht!', text: 'Toll, dass du dir die Zeit für einen bewussten Start genommen hast.' },
+      { title: 'Was für ein Anfang!', text: 'Mit so viel Dankbarkeit im Gepäck kann der Tag nur gut werden.' },
+      { title: 'Stark!', text: 'Du hast deinem Tag gerade eine klare Richtung gegeben.' },
+      { title: 'Wunderbar!', text: 'Ein paar ruhige Minuten für dich. Genau so beginnt ein guter Tag.' },
+      { title: 'Klasse!', text: 'Deine Affirmation steht. Nimm sie mit in den Tag.' },
+    ],
+    evening: [
+      { title: 'Super gemacht!', text: 'Toll, dass du dir die Zeit genommen hast, deinen Tag zu würdigen.' },
+      { title: 'Schön reflektiert!', text: 'Jeder kleine Erfolg zählt. Du darfst stolz auf dich sein.' },
+      { title: 'Gut gemacht!', text: 'Du hast heute etwas gelernt und gewonnen. Gönn dir jetzt Ruhe.' },
+      { title: 'Wunderbar!', text: 'Ein bewusster Abschluss für einen ganzen Tag. Schlaf gut.' },
+      { title: 'Respekt!', text: 'Dranbleiben ist das Schwerste, und du hast es heute wieder geschafft.' },
+    ],
+  };
+
   const padTo3 = a => [...(a || []), '', '', ''].slice(0, 3);
   const clean = a => a.map(s => s.trim()).filter(Boolean);
 
@@ -426,7 +461,8 @@
 
       // Tagebuch
       tab: 'today',
-      part: new Date().getHours() < 15 ? 'morning' : 'evening',
+      part: autoPart(),
+      now: new Date(),
       date: toISO(new Date()),
       entry: emptyEntry(),
       loadingEntry: false,
@@ -452,6 +488,9 @@
       // Start
       // ------------------------------------------------------------
       async init() {
+        // Uhr jede Sekunde aktualisieren
+        setInterval(() => { this.now = new Date(); }, 1000);
+
         if (SUPABASE_URL.includes('YOUR-PROJECT') || SUPABASE_ANON_KEY.includes('YOUR-ANON-KEY')) {
           this.view = 'config';
           return;
@@ -486,6 +525,13 @@
           if (e.key !== 'overall-theme' || !e.newValue) return;
           this.dark = e.newValue === 'dark';
           document.documentElement.classList.toggle('dark', this.dark);
+        });
+
+        // Beim Zurückkehren zur App (z. B. abends wieder geöffnet) passenden Bereich zeigen
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState !== 'visible' || this.view !== 'app') return;
+          this.now = new Date();
+          if (this.date === this.today()) this.part = autoPart();
         });
 
         // Ungespeicherte Änderungen beim Verlassen sichern
@@ -538,6 +584,7 @@
         if (error) { console.error(error); }
         if (data === true) {
           this.view = 'app';
+          this.part = autoPart();
           await this.loadEntry();
         } else {
           this.view = 'noaccess';
@@ -665,6 +712,22 @@
         if (this.saveState === 'saving') this.saveState = 'saved';
         this.upsertArchive({ ...row, ...data });
       },
+
+      // Sind alle Felder der Morgen- bzw. Abendroutine ausgefüllt?
+      complete(p) {
+        const e = this.entry, full = a => a.every(x => x.trim());
+        if (p === 'morning') return full(e.gratitude) && full(e.great_day) && !!e.affirmation.trim();
+        return full(e.went_well) && !!e.learned.trim() && !!e.mood && !!e.energy;
+      },
+      // Pro Tag und Routine ein festes Kompliment, damit es beim Tippen nicht wechselt
+      compliment(p) {
+        const list = COMPLIMENTS[p];
+        let h = 0; for (const c of this.date + p) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+        return list[h % list.length];
+      },
+
+      clockTime() { return this.now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); },
+      clockDate() { return this.now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); },
 
       saveStatus() {
         return { idle: '', pending: 'Änderungen …', saving: 'Speichert …', saved: 'Gespeichert', error: 'Speichern fehlgeschlagen. Bitte prüfe deine Verbindung.' }[this.saveState];
