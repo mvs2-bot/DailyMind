@@ -9,6 +9,8 @@ sowie Stimmung und Energie. Mit Archiv (Liste und Kalender) und Dark Mode.
 | Datei | Inhalt |
 | --- | --- |
 | `index.html` | Die komplette App: HTML, Tailwind (CDN), Alpine.js, supabase-js. Läuft direkt auf GitHub Pages. |
+| `sw.js`, `manifest.json` | App zum Installieren + Offline-Modus. |
+| `icons/` | App-Icons (Startbildschirm, maskable, Favicon). |
 | `supabase/001_dailymind_schema.sql` | Tabelle `public.dailymind_entries`, RLS-Policies, App-Registrierung in `overall_apps`. |
 
 ## Datenmodell
