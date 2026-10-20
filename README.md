@@ -25,3 +25,12 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
 - Zugriff nur mit Freischaltung für die App `dailymind` (mindestens Rolle `member`
   in `overall_app_access`), wie bei den anderen Apps in „core“.
 - Die Rolle `anon` hat keinerlei Rechte auf die Tabelle.
+
+## Konten und Profilmenü
+
+- Es gibt keine Registrierung in der App. Konten legt ein Admin in den Admin-Einstellungen
+  im Dashboard an (`/admin.html`) und gibt dort den Zugang für DailyMind frei.
+- Rechts oben sitzt wie in den anderen Apps das Profil-Rechteck (Profilbild oder 👤). Es öffnet ein Menü mit
+  ⚙️ Kontoeinstellungen (`/konto.html`), 🛡️ Admin-Einstellungen (nur für Admins) und 🚪 Abmelden.
+- Anzeigename und Profilbild kommen aus dem gemeinsamen Profil `overall_profiles`, Hell/Dunkel aus
+  dem gemeinsamen Schlüssel `overall-theme`.
