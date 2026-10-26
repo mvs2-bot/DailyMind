@@ -6,8 +6,9 @@
 //         Erinnerungen und merkt sie als gesendet. Abgelaufene Abos (404/410) werden gelöscht.
 //
 // "Verify JWT" ausschalten: Weder der Cron-Job noch der GET-Aufruf schicken ein Login-Token.
-// Secrets (Edge Functions → Secrets): VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY
-// Erzeugen z. B. mit: npx web-push generate-vapid-keys
+// VAPID-Schlüssel: erzeugt die Funktion beim ersten Start selbst und legt sie über
+// dailymind_push_vapid() im Vault ab (supabase/003_dailymind_push_vapid.sql). Wer eigene nutzen
+// will, setzt die Secrets VAPID_PUBLIC_KEY und VAPID_PRIVATE_KEY; die haben Vorrang.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
 
@@ -19,10 +20,6 @@ const CORS = {
 const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
 
-const PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY');
-const PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY');
-if (PUBLIC_KEY && PRIVATE_KEY) webpush.setVapidDetails('https://mvs2-bot.github.io/DailyMind/', PUBLIC_KEY, PRIVATE_KEY);
-
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
     auth: { persistSession: false, autoRefreshToken: false },
 });
@@ -32,13 +29,27 @@ const MESSAGES = {
     evening: { title: 'Guten Abend ☾', body: 'Nimm dir ein paar Minuten für deinen Tagesrückblick.' },
 } as const;
 
+let publicKey: string | null = null;
+async function vapid(): Promise<string> {
+    if (publicKey) return publicKey;
+    let pub = Deno.env.get('VAPID_PUBLIC_KEY'), priv = Deno.env.get('VAPID_PRIVATE_KEY');
+    if (!pub || !priv) {
+        const fresh = webpush.generateVAPIDKeys();
+        const { data, error } = await admin.rpc('dailymind_push_vapid', { p_public: fresh.publicKey, p_private: fresh.privateKey });
+        if (error) throw error;
+        pub = data.public_key; priv = data.private_key;
+    }
+    webpush.setVapidDetails('https://mvs2-bot.github.io/DailyMind/', pub!, priv!);
+    return (publicKey = pub!);
+}
+
 type Due = { user_id: string; kind: keyof typeof MESSAGES; endpoint: string; p256dh: string; auth: string };
 
 Deno.serve(async req => {
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
-    if (req.method === 'GET') return json({ publicKey: PUBLIC_KEY ?? null });
-    if (req.method !== 'POST') return json({ error: 'Methode nicht erlaubt' }, 405);
-    if (!PUBLIC_KEY || !PRIVATE_KEY) return json({ error: 'VAPID-Schlüssel fehlen' }, 500);
+    if (req.method !== 'GET' && req.method !== 'POST') return json({ error: 'Methode nicht erlaubt' }, 405);
+    try { await vapid(); } catch (e) { return json({ error: 'VAPID-Schlüssel: ' + (e as Error).message }, 500); }
+    if (req.method === 'GET') return json({ publicKey });
 
     const { data, error } = await admin.rpc('dailymind_push_claim', { p_secret: req.headers.get('x-dailymind-secret') ?? '' });
     if (error) return json({ error: error.message }, error.code === '42501' ? 403 : 500);
