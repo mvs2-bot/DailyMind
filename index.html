@@ -91,6 +91,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 <script src="shared/ios-nav.js" defer></script>
+  <script src="sprueche.js"></script>
 </head>
 
 <body class="min-h-screen bg-paper text-ink dark:bg-paper-dark dark:text-ink-dark font-sans font-light" x-data="dailyMind()">
@@ -345,18 +346,36 @@
             <p class="mb-3 text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="group.label"></p>
             <div class="space-y-3">
               <template x-for="e in group.entries" :key="e.id">
-                <button @click="goTo(e.entry_date)" class="block w-full rounded-3xl bg-card p-5 text-left shadow-sm transition hover:shadow-md dark:bg-card-dark">
-                  <div class="flex items-center justify-between">
-                    <span class="font-serif" x-text="shortDate(e.entry_date)"></span>
-                    <span class="flex items-center gap-2">
-                      <span x-show="e.morning_done_at" class="h-1.5 w-1.5 rounded-full bg-sand-500" title="Morgen"></span>
-                      <span x-show="e.evening_done_at" class="h-1.5 w-1.5 rounded-full bg-dusk-500" title="Abend"></span>
-                      <span x-show="e.mood" x-text="moodIcon(e.mood)"></span>
+                <div class="rounded-3xl bg-card shadow-sm transition hover:shadow-md dark:bg-card-dark">
+                  <div class="flex items-stretch">
+                    <button @click="goTo(e.entry_date)" class="min-w-0 flex-1 rounded-3xl p-5 pr-1 text-left">
+                      <div class="flex items-center justify-between">
+                        <span class="font-serif" x-text="shortDate(e.entry_date)"></span>
+                        <span class="flex items-center gap-2">
+                          <span x-show="e.morning_done_at" class="h-1.5 w-1.5 rounded-full bg-sand-500" title="Morgen"></span>
+                          <span x-show="e.evening_done_at" class="h-1.5 w-1.5 rounded-full bg-dusk-500" title="Abend"></span>
+                          <span x-show="e.mood" x-text="moodIcon(e.mood)"></span>
+                        </span>
+                      </div>
+                      <p x-show="e.affirmation" class="mt-2 font-serif italic text-ink-soft dark:text-ink-darksoft" x-text="'„' + e.affirmation + '“'"></p>
+                      <p x-show="!e.affirmation && firstFilled(e)" class="mt-2 truncate text-sm text-ink-soft dark:text-ink-darksoft" x-text="firstFilled(e)"></p>
+                    </button>
+                    <!-- Löschen: erst Sicherheitsabfrage, dann nur dieser eine Eintrag -->
+                    <button @click="confirmDelete = e.id" x-show="confirmDelete !== e.id" type="button"
+                            class="flex w-12 flex-none items-center justify-center rounded-r-3xl text-ink-soft/50 transition hover:text-[#B4533C] focus-visible:text-[#B4533C] dark:text-ink-darksoft/50 dark:hover:text-[#E39A85]"
+                            :aria-label="'Eintrag vom ' + shortDate(e.entry_date) + ' löschen'" title="Eintrag löschen">
+                      <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>
+                    </button>
+                  </div>
+                  <div x-show="confirmDelete === e.id" x-cloak x-transition.opacity.duration.150ms @keydown.escape="confirmDelete = null"
+                       class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-3 text-sm dark:border-line-dark" role="alertdialog" :aria-label="'Eintrag vom ' + shortDate(e.entry_date) + ' löschen?'">
+                    <span>Eintrag endgültig löschen?</span>
+                    <span class="flex gap-2">
+                      <button @click="confirmDelete = null" type="button" class="rounded-full border border-line px-4 py-1.5 hover:border-sage-500 dark:border-line-dark">Abbrechen</button>
+                      <button @click="deleteEntry(e)" :disabled="deleting" type="button" class="rounded-full bg-[#B4533C] px-4 py-1.5 text-white transition hover:bg-[#9C4532] disabled:opacity-50" x-text="deleting ? 'Löscht …' : 'Löschen'"></button>
                     </span>
                   </div>
-                  <p x-show="e.affirmation" class="mt-2 font-serif italic text-ink-soft dark:text-ink-darksoft" x-text="'„' + e.affirmation + '“'"></p>
-                  <p x-show="!e.affirmation && firstFilled(e)" class="mt-2 truncate text-sm text-ink-soft dark:text-ink-darksoft" x-text="firstFilled(e)"></p>
-                </button>
+                </div>
               </template>
             </div>
           </div>
@@ -427,21 +446,12 @@
   const EVENING_FROM_HOUR = 15;
   const autoPart = () => new Date().getHours() >= EVENING_FROM_HOUR ? 'evening' : 'morning';
 
-  const COMPLIMENTS = {
-    morning: [
-      { title: 'Super gemacht!', text: 'Toll, dass du dir die Zeit für einen bewussten Start genommen hast.' },
-      { title: 'Was für ein Anfang!', text: 'Mit so viel Dankbarkeit im Gepäck kann der Tag nur gut werden.' },
-      { title: 'Stark!', text: 'Du hast deinem Tag gerade eine klare Richtung gegeben.' },
-      { title: 'Wunderbar!', text: 'Ein paar ruhige Minuten für dich. Genau so beginnt ein guter Tag.' },
-      { title: 'Klasse!', text: 'Deine Affirmation steht. Nimm sie mit in den Tag.' },
-    ],
-    evening: [
-      { title: 'Super gemacht!', text: 'Toll, dass du dir die Zeit genommen hast, deinen Tag zu würdigen.' },
-      { title: 'Schön reflektiert!', text: 'Jeder kleine Erfolg zählt. Du darfst stolz auf dich sein.' },
-      { title: 'Gut gemacht!', text: 'Du hast heute etwas Gutes in die Welt gebracht. Gönn dir jetzt Ruhe.' },
-      { title: 'Wunderbar!', text: 'Ein bewusster Abschluss für einen ganzen Tag. Schlaf gut.' },
-      { title: 'Respekt!', text: 'Dranbleiben ist das Schwerste, und du hast es heute wieder geschafft.' },
-    ],
+  // Sprüche stehen in sprueche.js. Pro Kalendertag rückt die Liste um einen Spruch weiter:
+  // Innerhalb von 100 Tagen wiederholt sich keiner, und beim Tippen bleibt er gleich.
+  const dayNumber = iso => Math.round(fromISO(iso) / 864e5);
+  const pickSpruch = (p, iso) => {
+    const { titles, texts } = SPRUECHE[p], n = dayNumber(iso);
+    return { title: titles[n % titles.length], text: texts[n % texts.length] };
   };
 
   const padTo3 = a => [...(a || []), '', '', ''].slice(0, 3);
@@ -491,7 +501,9 @@
       // Archiv
       archive: [],
       archiveLoading: false,
-      archiveMode: 'list',
+      archiveMode: 'calendar',    // calendar | list – beim Öffnen immer Kalender
+      confirmDelete: null,        // id des Eintrags mit offener Sicherheitsabfrage
+      deleting: false,
       calMonth: toISO(new Date()).slice(0, 7),
 
       moods: [
@@ -740,12 +752,7 @@
         if (p === 'morning') return full(e.gratitude) && full(e.great_day) && !!e.affirmation.trim();
         return full(e.went_well) && !!e.learned.trim() && !!e.mood && !!e.energy;
       },
-      // Pro Tag und Routine ein festes Kompliment, damit es beim Tippen nicht wechselt
-      compliment(p) {
-        const list = COMPLIMENTS[p];
-        let h = 0; for (const c of this.date + p) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-        return list[h % list.length];
-      },
+      compliment(p) { return pickSpruch(p, this.date); },
 
       clockTime() { return this.now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); },
       clockDate() { return this.now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); },
@@ -774,6 +781,8 @@
       async openArchive() {
         if (this.saveState === 'pending') await this.save();
         this.tab = 'archive';
+        this.archiveMode = 'calendar';
+        this.confirmDelete = null;
         this.archiveLoading = this.archive.length === 0;
         const { data, error } = await this.sb
           .from('dailymind_entries')
@@ -789,6 +798,22 @@
         const i = this.archive.findIndex(a => a.entry_date === row.entry_date);
         if (i >= 0) this.archive[i] = { ...this.archive[i], ...row };
         else this.archive = [row, ...this.archive].sort((a, b) => b.entry_date.localeCompare(a.entry_date));
+      },
+      // Löscht genau diesen einen Eintrag. RLS lässt ohnehin nur eigene Zeilen zu.
+      async deleteEntry(e) {
+        this.deleting = true;
+        const { data, error } = await this.sb
+          .from('dailymind_entries')
+          .delete()
+          .eq('id', e.id)
+          .eq('user_id', this.user.id)
+          .select('id');
+        this.deleting = false;
+        if (error || !data?.length) { console.error(error); alert('Löschen hat nicht geklappt. Bitte versuch es noch einmal.'); return; }
+        this.confirmDelete = null;
+        this.archive = this.archive.filter(a => a.id !== e.id);
+        // Ist der Tag gerade im Tagebuch geöffnet, dort ebenfalls leeren
+        if (this.date === e.entry_date) { this.entry = emptyEntry(); this.saveState = 'idle'; }
       },
       archiveByMonth() {
         const groups = [];

@@ -9,6 +9,7 @@ sowie Stimmung und Energie. Mit Archiv (Liste und Kalender) und Dark Mode.
 | Datei | Inhalt |
 | --- | --- |
 | `index.html` | Die komplette App: HTML, Tailwind (CDN), Alpine.js, supabase-js. Läuft direkt auf GitHub Pages. |
+| `sprueche.js` | Je 100 Sprüche für Morgen und Abend (plus kurze Überschriften). |
 | `sw.js`, `manifest.json` | App zum Installieren + Offline-Modus. |
 | `icons/` | App-Icons (Startbildschirm, maskable, Favicon). |
 | `supabase/001_dailymind_schema.sql` | Tabelle `public.dailymind_entries`, RLS-Policies, App-Registrierung in `overall_apps`. |
@@ -43,5 +44,12 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
 - Ab 15 Uhr öffnet die App direkt mit der Abendroutine, davor mit der Morgenroutine
   (`EVENING_FROM_HOUR` in `index.html`). Das gilt beim Öffnen, nach dem Login und wenn man
   später zur offenen App zurückkehrt.
-- Sind alle Felder einer Routine ausgefüllt, erscheint darunter ein Kompliment. Pro Tag und Routine
-  bleibt es dasselbe, damit es beim Tippen nicht wechselt.
+- Sind alle Felder einer Routine ausgefüllt, erscheint darunter ein Spruch aus `sprueche.js`.
+  Pro Kalendertag rückt die Liste um einen weiter: Innerhalb von 100 Tagen wiederholt sich kein Spruch,
+  und beim Tippen bleibt er gleich. Neue Sprüche einfach in die Liste schreiben.
+
+## Archiv
+
+- Das Archiv öffnet immer in der Kalenderansicht. Die Listenansicht ist einen Klick entfernt.
+- In der Liste hat jeder Eintrag rechts einen Papierkorb. Nach einer kurzen Sicherheitsabfrage wird
+  genau dieser eine Tag gelöscht (nur eigene Einträge, abgesichert über RLS).
