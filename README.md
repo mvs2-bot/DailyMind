@@ -8,10 +8,11 @@ sowie Stimmung und Energie. Mit Archiv (Liste und Kalender) und Dark Mode.
 
 | Datei | Inhalt |
 | --- | --- |
-| `index.html` | Die komplette App: HTML, Tailwind (CDN), Alpine.js, supabase-js. Läuft direkt auf GitHub Pages. |
+| `index.html` | Die komplette App: HTML, eigenes CSS (Apple-Designsprache wie „Zuhause“), Alpine.js, supabase-js. Läuft direkt auf GitHub Pages. |
 | `sprueche.js` | Je 100 Sprüche für Morgen und Abend (plus kurze Überschriften). |
 | `push.js` | Push-Erinnerungen auf einem Gerät ein-/ausschalten. Wird auch von `/konto.html` geladen. |
 | `sw.js`, `manifest.json` | App zum Installieren + Offline-Modus, zeigt Push-Erinnerungen. |
+| `docs/` | Screenshots der Oberfläche (Handy und Rechner, hell und dunkel). |
 | `icons/` | App-Icons (Startbildschirm, maskable, Favicon). |
 | `supabase/001_dailymind_schema.sql` | Tabelle `public.dailymind_entries`, RLS-Policies, App-Registrierung in `overall_apps`. |
 | `supabase/002_dailymind_push.sql` | Push-Erinnerungen: Einstellungen, Geräte-Abos, Cron-Job (rein additiv). |
@@ -37,8 +38,8 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
 
 - Es gibt keine Registrierung in der App. Konten legt ein Admin in den Admin-Einstellungen
   im Dashboard an (`/admin.html`) und gibt dort den Zugang für DailyMind frei.
-- Rechts oben sitzt wie in den anderen Apps das Profil-Rechteck (Profilbild oder 👤). Es öffnet ein Menü mit
-  ⚙️ Kontoeinstellungen (`/konto.html`), 🛡️ Admin-Einstellungen (nur für Admins) und 🚪 Abmelden.
+- Rechts oben sitzt wie in den anderen Apps der runde Profilknopf (Profilbild oder Personen-Symbol). Er öffnet ein Menü mit
+  Kontoeinstellungen (`/konto.html`), Admin-Einstellungen (nur für Admins) und Abmelden.
 - Anzeigename und Profilbild kommen aus dem gemeinsamen Profil `overall_profiles`, Hell/Dunkel aus
   dem gemeinsamen Schlüssel `overall-theme`.
 
@@ -80,3 +81,12 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
    und `VAPID_PRIVATE_KEY`).
 3. Edge Function `dailymind-push` deployen, „Verify JWT“ ausschalten
    (`supabase functions deploy dailymind-push --no-verify-jwt`).
+
+## Design
+
+Gleiche Designsprache wie das mvs2-Dashboard und „Zuhause“: Systemschrift, 12–22 px (Basis 14 px), weiße Karten auf
+`#f2f2f7`, im Dunkeln dunkelgraue Karten (`#1c1c1e`) auf Schwarz, Linien-Symbole statt Emojis. Die Farben stehen als
+CSS-Variablen oben in `index.html` (`--bg`, `--card`, `--well`, `--ink`, `--mute`, `--p1` …).
+
+- Akzent: Salbeigrün `#4a7356` (dunkel `#8fc49c`)
+- Morgen: Orange `#b25000` (dunkel `#ffb340`), Abend: Indigo `#5856d6` (dunkel `#9d9bff`)

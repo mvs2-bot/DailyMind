@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>DailyMind</title>
   <meta name="description" content="DailyMind – dein ruhiges Tagebuch für Dankbarkeit und Achtsamkeit.">
-  <meta name="theme-color" content="#F6F3EC" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#181B19" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -14,10 +14,6 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DailyMind">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <!-- Dark Mode vor dem ersten Rendern setzen, damit nichts aufblitzt -->
   <script>
@@ -30,62 +26,227 @@
     } catch (_) {}
   </script>
 
-  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            serif: ['Fraunces', 'Georgia', 'serif'],
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-          },
-          colors: {
-            paper:  { DEFAULT: '#F6F3EC', dark: '#181B19' },
-            card:   { DEFAULT: '#FFFDF8', dark: '#212522' },
-            line:   { DEFAULT: '#E6E0D3', dark: '#2E3330' },
-            ink:    { DEFAULT: '#3B3A36', soft: '#7A766D', dark: '#E7E4DC', darksoft: '#9EA39C' },
-            sage:   { 50: '#EEF3EE', 100: '#DCE7DD', 300: '#A9C0AC', 500: '#7C9A82', 600: '#647F69', 700: '#4F6553' },
-            sand:   { 100: '#F1EADB', 300: '#E0D2B4', 500: '#C9A88A' },
-            dusk:   { 100: '#E8E6F1', 300: '#BDB7D6', 500: '#8E86B5' },
-          },
-          borderRadius: { '4xl': '2rem' },
-        },
-      },
-    };
-  </script>
-
   <style>
-    [x-cloak] { display: none !important; }
-    html { -webkit-font-smoothing: antialiased; }
-    body { transition: background-color .4s ease, color .4s ease; }
-    .field {
-      width: 100%;
-      background: transparent;
-      border: 0;
-      border-bottom: 1px solid var(--line);
-      padding: .6rem 0;
-      outline: none;
-      transition: border-color .2s ease;
+    /* DailyMind – Apple-Designsprache wie im Smart-Home-Dashboard „Zuhause“ und im mvs2-Dashboard:
+       Systemschrift, kleine bis mittlere Größen (12–22 px), weiße Karten auf grauem Grund, Linien-Symbole.
+       Akzent ist das Salbeigrün von DailyMind, Morgen in Orange, Abend in Indigo. */
+    :root {
+      --bg: #f2f2f7; --card: #fff; --well: #f2f2f7; --hover: #e9e9ef; --line: #e2e2e7; --sep: rgba(60, 60, 67, .14);
+      --ink: #1c1c1e; --text: #3a3a3c; --mute: #6c6c70;
+      --p1: #4a7356; --p1-soft: #e7f0e9; --on-p1: #fff;
+      --sun: #b25000; --sun-soft: #fff1e0; --moon: #5856d6; --moon-soft: #ececfb;
+      --ok: #248a3d; --danger: #d70015; --danger-soft: #ffe6e8;
+      --radius: 18px; --radius-s: 12px; --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 14px rgba(0, 0, 0, .04);
+      --pop: 0 12px 40px rgba(0, 0, 0, .18), 0 0 0 .5px rgba(0, 0, 0, .06);
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      --serif: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+      /* Namen, die ios-nav.js erwartet */
+      --border: var(--line); --accent: var(--p1); --card-hover: var(--hover); --muted: var(--mute);
+      color-scheme: light;
     }
-    .field:focus { border-bottom-color: #7C9A82; }
-    .field::placeholder { color: var(--placeholder); }
-    textarea.field { resize: none; line-height: 1.6; }
-    :root { --line: #E6E0D3; --placeholder: #B5AFA3; }
-    .dark { --line: #2E3330; --placeholder: #5F655F; }
-    input[type=range] { accent-color: #7C9A82; }
-    /* Kopfzeilen-Buttons: abgerundetes Rechteck wie in Quest Log, TravelBase & Co. */
-    .hbtn { display: inline-flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
-            min-width: 46px; height: 42px; padding: 0 11px; font-size: 1.15rem; line-height: 1;
-            background: #FFFDF8; border: 2px solid var(--line); border-radius: 10px; box-shadow: 0 1px 2px rgba(59,58,54,.06); transition: border-color .2s, background-color .2s; }
-    .hbtn:hover { border-color: #7C9A82; }
-    .dark .hbtn { background: #212522; }
-    .me-btn.has-photo { padding: 0; width: 46px; }
-    .me-btn img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .me-item { display: flex; width: 100%; align-items: center; gap: 10px; border-radius: 14px; padding: 10px 12px; font-size: .92rem; font-weight: 500; text-align: left; }
-    .me-item:hover, .me-item:focus-visible { background: rgba(124,154,130,.12); outline: none; }
-    .fade-enter { animation: fade .35s ease both; }
+    .dark {
+      color-scheme: dark; --bg: #000; --card: #1c1c1e; --well: #2c2c2e; --hover: #3a3a3c; --line: #38383a; --sep: rgba(84, 84, 88, .55);
+      --ink: #f5f5f7; --text: #d1d1d6; --mute: #98989f;
+      --p1: #8fc49c; --p1-soft: #15281a; --on-p1: #0d2614;
+      --sun: #ffb340; --sun-soft: #33240b; --moon: #9d9bff; --moon-soft: #1d1c3d;
+      --ok: #30d158; --danger: #ff6961; --danger-soft: #3a1412;
+      --shadow: none; --pop: 0 16px 48px rgba(0, 0, 0, .6), 0 0 0 .5px rgba(255, 255, 255, .08);
+    }
+    [x-cloak], [hidden] { display: none !important; }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+    body { margin: 0; min-height: 100vh; font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.45; letter-spacing: -.005em;
+      -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+    ::selection { background: color-mix(in srgb, var(--p1) 28%, transparent); color: var(--ink); }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; }
+    :focus-visible { outline: 2px solid var(--p1); outline-offset: 2px; }
+    h1, h2, h3, p { margin: 0; }
+    .ic { width: 1.25em; height: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .wrap { max-width: 600px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+
+    /* Kopf: klein, ruhig, Systemmaterial beim Scrollen */
+    header { position: sticky; top: 0; z-index: 20; padding-top: env(safe-area-inset-top, 0px);
+      background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: saturate(1.8) blur(18px); backdrop-filter: saturate(1.8) blur(18px); }
+    header .wrap { padding-bottom: 0; }
+    .bar { display: flex; align-items: center; gap: 12px; padding-block: 12px 10px; }
+    .bar .logo { width: 36px; height: 36px; flex: none; border-radius: 9px; }
+    .bar .head { flex: 1; min-width: 0; }
+    h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); line-height: 1.15; }
+    .sub { font-size: 12px; font-weight: 500; color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub time::before { content: "·"; margin: 0 6px; }
+    .acts { display: flex; gap: 8px; flex: none; }
+    .icon-btn { position: relative; overflow: hidden; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--card); color: var(--ink); box-shadow: var(--shadow);
+      display: inline-grid; place-items: center; padding: 0; transition: background .15s; }
+    .icon-btn:hover { background: var(--hover); }
+    .icon-btn:disabled { opacity: .35; }
+    .icon-btn .ic { width: 18px; height: 18px; }
+    .icon-btn img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    @media (max-width: 420px) { .bar .logo { display: none; } }
+
+    /* Kontomenü oben rechts */
+    .me { position: relative; }
+    /* Deckend: im Kopf (der selbst schon weichzeichnet) würde ein zweiter Weichzeichner nicht greifen */
+    .pm-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 30; width: 280px; max-width: calc(100vw - 32px); padding: 6px; color: var(--text); border-radius: 14px; box-shadow: var(--pop); background: var(--card); }
+    .pm-head { display: flex; gap: 10px; align-items: center; padding: 8px 10px 10px; margin-bottom: 4px; border-bottom: 1px solid var(--sep); min-width: 0; }
+    .pm-head > div { min-width: 0; }
+    .pm-head b { display: block; font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pm-head small { display: block; font-size: 12px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pm-ava { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; color: #fff; font-size: 14px; font-weight: 600; }
+    .pm-ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pm-item { display: flex; width: 100%; align-items: center; gap: 10px; min-height: 40px; padding: 8px 10px; border: 0; border-radius: 8px;
+      background: none; color: var(--ink); font-size: 14px; font-weight: 500; text-align: left; text-decoration: none; }
+    .pm-item .ic { width: 18px; height: 18px; color: var(--mute); }
+    .pm-item:hover, .pm-item:focus-visible { background: var(--hover); outline: none; }
+    .pm-item small { margin-left: auto; font-size: 11px; color: var(--mute); white-space: nowrap; }
+    .pm-item.danger, .pm-item.danger .ic { color: var(--danger); }
+    .pm-sep { height: 1px; margin: 4px 6px; background: var(--sep); }
+
+    /* Segmente wie in iOS */
+    .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: color-mix(in srgb, var(--mute) 14%, transparent); border-radius: 9px; padding: 2px; gap: 2px; }
+    .seg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: none; border-radius: 7px; padding: 6px 12px; min-height: 32px;
+      font-size: 13px; font-weight: 500; color: var(--ink); transition: background .15s; }
+    .seg button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); font-weight: 600; }
+    .dark .seg button[aria-pressed="true"] { background: #636366; }
+    .seg .ic { width: 15px; height: 15px; }
+    .seg .sun { color: var(--sun); } .seg .moon { color: var(--moon); }
+    .seg.small { display: inline-grid; } .seg.small button { min-height: 28px; padding: 4px 12px; font-size: 12px; }
+    .tabs { margin: 8px 0 18px; }
+
+    /* Karten */
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+    .stack { display: grid; gap: 12px; margin-top: 14px; }
+    .card h3 { font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); line-height: 1.3; }
+    .card .hint { font-size: 12px; color: var(--mute); margin-top: 2px; }
+    .card-head { display: flex; align-items: center; gap: 10px; }
+    .badge-ic { flex: none; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--p1-soft); color: var(--p1); }
+    .badge-ic .ic { width: 16px; height: 16px; }
+    .badge-ic.sun { background: var(--sun-soft); color: var(--sun); }
+    .badge-ic.moon { background: var(--moon-soft); color: var(--moon); }
+
+    /* Eingabezeilen wie in einer iOS-Liste: Nummer, Feld, Trennlinie */
+    .rows { margin-top: 8px; }
+    .row { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--sep); }
+    .row:first-child { border-top: 0; }
+    .row .n { flex: none; width: 16px; font-size: 12px; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; text-align: center; }
+    .field { width: 100%; min-width: 0; padding: 11px 0; border: 0; background: none; outline: none; font-size: 15px; color: var(--ink); line-height: 1.4; }
+    .field::placeholder { color: color-mix(in srgb, var(--mute) 60%, transparent); }
+    textarea.field { resize: none; display: block; }
+    .area { margin-top: 10px; padding: 2px 12px; border-radius: var(--radius-s); background: var(--well); }
+    .area:focus-within, .row:focus-within .n { color: var(--p1); }
+    .area:focus-within { box-shadow: inset 0 0 0 1.5px var(--p1); }
+    .affirm { font-family: var(--serif); font-style: italic; font-size: 17px; }
+
+    /* Stimmung und Energie */
+    .moods { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; }
+    .moods button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 2px 8px; border: 0; border-radius: var(--radius-s); background: var(--well); color: var(--mute);
+      font-size: 11px; font-weight: 500; transition: background .15s, color .15s; }
+    .moods button:hover { color: var(--ink); }
+    .moods button .ic { width: 24px; height: 24px; }
+    .moods button[aria-pressed="true"] { background: var(--moon-soft); color: var(--moon); font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--moon); }
+    .energy { margin-top: 18px; }
+    .energy .top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 600; color: var(--ink); }
+    .energy .top span { font-weight: 500; color: var(--mute); font-size: 12px; }
+    .energy input { width: 100%; height: 28px; margin: 6px 0 0; accent-color: var(--moon); }
+    .energy input.unset { opacity: .45; }
+    .scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--mute); }
+
+    /* Datumsleiste */
+    .day { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .day .mid { text-align: center; min-width: 0; }
+    .eyebrow { font-size: 12px; font-weight: 600; color: var(--mute); }
+    .day h2 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); line-height: 1.2; }
+    .link { display: inline-block; padding: 2px 0; border: 0; background: none; font-size: 13px; font-weight: 600; color: var(--p1); }
+    .link:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .parts { margin-top: 14px; }
+    .done-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* Hinweise, Kompliment, Status */
+    .note { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 14px; }
+    .note p { flex: 1 1 14rem; font-size: 13px; color: var(--text); display: flex; gap: 10px; align-items: flex-start; }
+    .note p .ic { width: 18px; height: 18px; color: var(--p1); margin-top: 1px; }
+    .note .acts2 { display: flex; gap: 8px; margin-left: auto; }
+    .praise { display: flex; gap: 12px; align-items: center; }
+    .praise .badge-ic { width: 40px; height: 40px; border-radius: 12px; }
+    .praise .badge-ic .ic { width: 22px; height: 22px; }
+    .praise b { display: block; font-size: 16px; font-weight: 600; color: var(--ink); }
+    .praise span { display: block; font-size: 13px; color: var(--mute); }
+    .status { margin-top: 14px; min-height: 18px; text-align: center; font-size: 12px; font-weight: 500; color: var(--mute); }
+    .status.err { color: var(--danger); }
+
+    /* Knöpfe */
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 7px 16px; font-size: 14px; font-weight: 600; border: 0; border-radius: 999px;
+      background: var(--p1); color: var(--on-p1); transition: filter .15s; }
+    .btn:hover { filter: brightness(1.06); }
+    .btn:disabled { opacity: .5; }
+    .btn.wide { width: 100%; min-height: 44px; border-radius: 12px; font-size: 15px; }
+    .btn.ghost { background: var(--well); color: var(--ink); }
+    .btn.red { background: var(--danger); color: #fff; }
+    .dark .btn.red { color: #3a0906; }
+
+    /* Archiv */
+    .arch-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .arch-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); }
+    .group-label { margin: 18px 4px 8px; font-size: 13px; font-weight: 600; color: var(--mute); }
+    .list { padding: 0; overflow: hidden; }
+    .entry + .entry { border-top: 1px solid var(--sep); }
+    .entry .line { display: flex; align-items: stretch; }
+    .entry .open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 12px 6px 12px 16px; border: 0; background: none; text-align: left; transition: background .15s; }
+    .entry .open:hover { background: color-mix(in srgb, var(--card) 70%, var(--hover)); }
+    .entry .txt { flex: 1; min-width: 0; }
+    .entry .date { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
+    .entry .snip { display: block; font-size: 13px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .entry .snip.q { font-family: var(--serif); font-style: italic; }
+    .entry .meta { display: flex; align-items: center; gap: 6px; flex: none; color: var(--mute); }
+    .entry .meta .ic { width: 18px; height: 18px; }
+    .entry .chev { width: 14px; height: 14px; opacity: .55; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+    .dot.sun { background: var(--sun); } .dot.moon { background: var(--moon); }
+    .del { flex: none; width: 44px; border: 0; background: none; color: var(--mute); display: grid; place-items: center; transition: color .15s; }
+    .del .ic { width: 17px; height: 17px; }
+    .del:hover, .del:focus-visible { color: var(--danger); }
+    .confirm { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 0 16px; padding: 10px 0 12px; border-top: 1px solid var(--sep); font-size: 13px; font-weight: 500; color: var(--ink); }
+    .confirm span { display: flex; gap: 8px; }
+    .confirm .btn { min-height: 32px; padding: 5px 14px; font-size: 13px; }
+    .empty { padding: 60px 16px; text-align: center; font-size: 13px; color: var(--mute); }
+
+    /* Kalender */
+    .cal { margin-top: 14px; }
+    .cal-head { display: flex; align-items: center; justify-content: space-between; }
+    .cal-head b { font-size: 16px; font-weight: 600; color: var(--ink); }
+    .cal-head .icon-btn { background: var(--well); box-shadow: none; width: 32px; height: 32px; }
+    .wk, .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .wk { margin-top: 10px; text-align: center; font-size: 11px; font-weight: 600; color: var(--mute); padding: 4px 0; }
+    .days button { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; border-radius: 10px; background: none;
+      font-size: 14px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; transition: background .15s; }
+    .days button:not(:disabled):hover { background: var(--hover); }
+    .days button.has { background: var(--p1-soft); }
+    .days button.today { box-shadow: inset 0 0 0 1.5px var(--p1); color: var(--p1); font-weight: 700; }
+    .days button.future { opacity: .3; }
+    .days .dots { display: flex; gap: 3px; height: 5px; }
+    .days .dot { width: 5px; height: 5px; }
+    .legend { display: flex; justify-content: center; gap: 16px; margin-top: 12px; font-size: 11px; font-weight: 500; color: var(--mute); }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+
+    /* Anmeldung, Hinweise ohne App */
+    .gate { max-width: 380px; margin: 8vh auto 0; }
+    .gate h2 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); margin-bottom: 4px; }
+    .gate p.lead { margin: 0 0 16px; font-size: 13px; color: var(--mute); }
+    .gate label { display: grid; gap: 4px; font-size: 12px; font-weight: 500; color: var(--mute); margin-bottom: 12px; }
+    .gate input { width: 100%; padding: 10px 12px; font-size: 16px; border: 0; border-radius: 10px; background: var(--well); color: var(--ink); }
+    .gate input:focus { outline: 2px solid var(--p1); outline-offset: 0; }
+    .gate .links { display: grid; justify-items: center; gap: 6px; margin-top: 12px; font-size: 12px; color: var(--mute); text-align: center; }
+    .msg { margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 500; background: var(--danger-soft); color: var(--danger); }
+    .msg.ok { background: var(--p1-soft); color: var(--p1); }
+    code { font-size: 12px; padding: 1px 5px; border-radius: 5px; background: var(--well); color: var(--ink); }
+
+    .spin { width: 18px; height: 18px; margin: 80px auto; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--mute); animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .fade-enter { animation: fade .3s ease both; }
     @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } .spin { animation: spin 1.6s linear infinite !important; } }
+    @media (prefers-reduced-transparency: reduce) { header { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -95,7 +256,7 @@
   <script src="push.js"></script>
 </head>
 
-<body class="min-h-screen bg-paper text-ink dark:bg-paper-dark dark:text-ink-dark font-sans font-light" x-data="dailyMind()">
+<body x-data="dailyMind()">
 
 <!-- ================================================================ -->
 <!-- Konfiguration                                                      -->
@@ -107,92 +268,110 @@
   // Gemeinsame Konto- und Admin-Seiten im Dashboard (mvs2-bot.github.io)
   const ACCOUNT_URL       = '/konto.html?from=dailymind#app-dailymind';
   const ADMIN_URL         = '/admin.html?from=dailymind';
-  const AVATAR_COLORS     = ['#7C9A82', '#C9A88A', '#8E86B5', '#6E8FA6', '#B4836B', '#8A9A5B'];
+  const AVATAR_COLORS     = ['#4a7356', '#b25000', '#5856d6', '#0066cc', '#a2453a', '#6b7a2e'];
+
+  // Linien-Symbole (gleiche Strichstärke wie in „Zuhause“ und im Dashboard)
+  const svg = d => '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
+  const IC = {
+    rain:     svg('<path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M8 14v5M12 16v5M16 14v5"/>'),
+    cloud:    svg('<path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9z"/>'),
+    cloudSun: svg('<path d="M12 2v2M4.9 4.9l1.4 1.4M20 12h2M19.1 4.9l-1.4 1.4M15.9 12.6a4 4 0 0 0-5.9-4.1"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6z"/>'),
+    sunDim:   svg('<circle cx="12" cy="12" r="4.5"/><path d="M12 3.5h.01M20.5 12h.01M12 20.5h.01M3.5 12h.01M18 6h.01M18 18h.01M6 18h.01M6 6h.01"/>'),
+    sun:      svg('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>'),
+  };
 </script>
 
-<div class="mx-auto max-w-xl px-5 sm:px-6 pb-24">
-
-  <!-- Kopfzeile -->
-  <header class="flex items-center justify-between py-8">
-    <div class="flex items-center gap-3">
-      <span class="h-2.5 w-2.5 rounded-full bg-sage-500"></span>
-      <span class="font-serif text-xl tracking-tight">DailyMind</span>
+<!-- Kopfzeile -->
+<header>
+  <div class="wrap bar">
+    <img class="logo" src="icon.svg" alt="">
+    <div class="head">
+      <h1>DailyMind</h1>
+      <div class="sub" x-show="view === 'app'" aria-live="off"><span x-text="clockDate()"></span><time x-text="clockTime()"></time></div>
+      <div class="sub" x-show="view !== 'app'">Dein ruhiges Tagebuch</div>
     </div>
-    <div class="flex items-center gap-2">
-      <button @click="toggleTheme()" class="hbtn" :aria-label="dark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'" x-text="dark ? '☀️' : '🌙'">🌙</button>
+    <div class="acts">
+      <button @click="toggleTheme()" class="icon-btn" type="button" :aria-label="dark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'" :title="dark ? 'Hell' : 'Dunkel'">
+        <svg x-show="!dark" class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        <svg x-show="dark" x-cloak class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>
+      </button>
 
       <!-- Profilmenü wie in den anderen Apps: Kontoeinstellungen, Admin-Einstellungen, Abmelden -->
-      <div class="relative" x-show="view === 'app' || view === 'noaccess'" x-cloak @click.outside="menuOpen = false" @keydown.escape.window="if (menuOpen) { menuOpen = false; $refs.meBtn.focus(); }">
-        <button x-ref="meBtn" @click="toggleMenu()" class="hbtn me-btn" :class="me.photo && 'has-photo'" type="button" aria-label="Mein Konto" title="Mein Konto" aria-haspopup="menu" :aria-expanded="menuOpen" aria-controls="meMenu">
+      <div class="me" x-show="view === 'app' || view === 'noaccess'" x-cloak @click.outside="menuOpen = false" @keydown.escape.window="if (menuOpen) { menuOpen = false; $refs.meBtn.focus(); }">
+        <button x-ref="meBtn" @click="toggleMenu()" class="icon-btn" type="button" aria-label="Mein Konto" title="Mein Konto" aria-haspopup="menu" :aria-expanded="menuOpen" aria-controls="meMenu">
           <template x-if="me.photo"><img :src="me.photo" alt=""></template>
-          <span x-show="!me.photo">👤</span>
+          <svg x-show="!me.photo" class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
         </button>
-        <div id="meMenu" x-show="menuOpen" x-cloak x-transition.opacity.duration.150ms @click="if ($event.target.closest('.me-item')) menuOpen = false"
-             class="absolute right-0 top-[calc(100%+8px)] z-50 w-64 max-w-[calc(100vw-32px)] rounded-3xl border border-line bg-card p-2 shadow-xl dark:border-line-dark dark:bg-card-dark" role="menu">
-          <div class="mb-1.5 flex items-center gap-3 border-b border-line px-2.5 pb-3 pt-2 dark:border-line-dark">
-            <span class="flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-full border-2 border-line dark:border-line-dark">
-              <template x-if="me.photo"><img :src="me.photo" alt="" class="h-full w-full object-cover"></template>
-              <span x-show="!me.photo" class="flex h-full w-full items-center justify-center text-sm font-semibold text-white" :style="'background:' + me.color" x-text="me.initials"></span>
+        <div id="meMenu" class="pm-menu" x-show="menuOpen" x-cloak x-transition.opacity.duration.150ms @click="if ($event.target.closest('.pm-item')) menuOpen = false" role="menu">
+          <div class="pm-head">
+            <span class="pm-ava" :style="'background:' + me.color">
+              <template x-if="me.photo"><img :src="me.photo" alt=""></template>
+              <span x-show="!me.photo" x-text="me.initials"></span>
             </span>
-            <div class="min-w-0">
-              <b class="block truncate font-medium text-ink dark:text-ink-dark" x-text="me.name"></b>
-              <span class="block truncate text-xs text-ink-soft dark:text-ink-darksoft" x-text="user?.email"></span>
+            <div>
+              <b x-text="me.name"></b>
+              <small x-text="user?.email"></small>
             </div>
           </div>
-          <a class="me-item" :href="ACCOUNT_URL" role="menuitem">⚙️ Kontoeinstellungen</a>
-          <a class="me-item" :href="ADMIN_URL" role="menuitem" x-show="me.admin">🛡️ Admin-Einstellungen</a>
-          <button class="me-item text-[#B4533C] dark:text-[#E39A85]" type="button" role="menuitem" @click="signOut()">🚪 Abmelden</button>
+          <a class="pm-item" :href="ACCOUNT_URL" role="menuitem"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Kontoeinstellungen</a>
+          <a class="pm-item" :href="ADMIN_URL" role="menuitem" x-show="me.admin"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>Admin-Einstellungen<small>nur Admins</small></a>
+          <div class="pm-sep"></div>
+          <button class="pm-item danger" type="button" role="menuitem" @click="signOut()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>Abmelden</button>
         </div>
       </div>
     </div>
-  </header>
+  </div>
+</header>
+
+<div class="wrap">
 
   <!-- Laden -->
-  <section x-show="view === 'loading'" class="py-32 text-center text-ink-soft dark:text-ink-darksoft">
-    <div class="mx-auto h-2 w-2 animate-ping rounded-full bg-sage-500"></div>
-  </section>
+  <section x-show="view === 'loading'" aria-label="Wird geladen"><div class="spin"></div></section>
 
   <!-- Konfiguration fehlt -->
-  <section x-show="view === 'config'" x-cloak class="fade-enter rounded-4xl bg-card p-8 shadow-sm dark:bg-card-dark">
-    <h1 class="font-serif text-2xl">Fast geschafft</h1>
-    <p class="mt-3 text-ink-soft dark:text-ink-darksoft">Trage im Konfigurationsblock oben in <code class="rounded bg-sand-100 px-1.5 py-0.5 text-sm dark:bg-line-dark">index.html</code> die Supabase-URL und den Anon-Key deines Projekts „core“ ein.</p>
+  <section x-show="view === 'config'" x-cloak class="gate fade-enter">
+    <div class="card">
+      <h2>Fast geschafft</h2>
+      <p class="lead">Trage im Konfigurationsblock oben in <code>index.html</code> die Supabase-URL und den Anon-Key deines Projekts „core“ ein.</p>
+    </div>
   </section>
 
   <!-- ============================================================== -->
   <!-- Login (Konten legt nur ein Admin an)                            -->
   <!-- ============================================================== -->
-  <section x-show="view === 'auth'" x-cloak class="fade-enter pt-6">
-    <h1 class="font-serif text-4xl font-light leading-tight tracking-tight" x-text="authTitle()"></h1>
-    <p class="mt-3 text-ink-soft dark:text-ink-darksoft" x-show="authMode !== 'recover'">Sechs ruhige Minuten am Tag. Für Dankbarkeit, Klarheit und einen freundlichen Blick auf dich selbst.</p>
+  <section x-show="view === 'auth'" x-cloak class="gate fade-enter">
+    <form @submit.prevent="submitAuth()" class="card">
+      <h2 x-text="authTitle()"></h2>
+      <p class="lead" x-show="authMode !== 'recover'">Sechs ruhige Minuten am Tag. Für Dankbarkeit, Klarheit und einen freundlichen Blick auf dich selbst.</p>
+      <p class="lead" x-show="authMode === 'recover'">Wähle ein neues Passwort mit mindestens 8 Zeichen.</p>
 
-    <form @submit.prevent="submitAuth()" class="mt-10 space-y-6">
-      <div x-show="authMode !== 'recover'">
-        <label class="text-xs uppercase tracking-widest text-ink-soft dark:text-ink-darksoft">E-Mail</label>
-        <input type="email" x-model="form.email" :required="authMode !== 'recover'" autocomplete="email" class="field" placeholder="du@beispiel.de">
+      <label x-show="authMode !== 'recover'">E-Mail
+        <input type="email" x-model="form.email" :required="authMode !== 'recover'" autocomplete="email" placeholder="du@beispiel.de">
+      </label>
+      <label x-show="authMode !== 'reset'"><span x-text="authMode === 'recover' ? 'Neues Passwort' : 'Passwort'"></span>
+        <input type="password" x-model="form.password" :required="authMode !== 'reset'" minlength="8" :autocomplete="authMode === 'login' ? 'current-password' : 'new-password'" placeholder="Mindestens 8 Zeichen">
+      </label>
+
+      <p x-show="auth.error" x-text="auth.error" class="msg" role="alert"></p>
+      <p x-show="auth.info" x-text="auth.info" class="msg ok"></p>
+
+      <button type="submit" :disabled="auth.busy" class="btn wide" x-text="authButton()"></button>
+
+      <div class="links">
+        <button x-show="authMode === 'login'" @click="switchAuth('reset')" type="button" class="link">Passwort vergessen?</button>
+        <button x-show="authMode === 'reset'" @click="switchAuth('login')" type="button" class="link">Zurück zur Anmeldung</button>
+        <span x-show="authMode === 'login'">Noch kein Konto? Zugänge vergibt dein Admin.</span>
       </div>
-      <div x-show="authMode !== 'reset'">
-        <label class="text-xs uppercase tracking-widest text-ink-soft dark:text-ink-darksoft" x-text="authMode === 'recover' ? 'Neues Passwort' : 'Passwort'"></label>
-        <input type="password" x-model="form.password" :required="authMode !== 'reset'" minlength="8" :autocomplete="authMode === 'login' ? 'current-password' : 'new-password'" class="field" placeholder="Mindestens 8 Zeichen">
-      </div>
-
-      <p x-show="auth.error" x-text="auth.error" class="rounded-2xl bg-sand-100 px-4 py-3 text-sm text-ink dark:bg-line-dark dark:text-ink-dark"></p>
-      <p x-show="auth.info" x-text="auth.info" class="rounded-2xl bg-sage-50 px-4 py-3 text-sm text-sage-700 dark:bg-sage-700/20 dark:text-sage-300"></p>
-
-      <button type="submit" :disabled="auth.busy" class="w-full rounded-full bg-sage-500 py-3.5 font-normal text-white transition hover:bg-sage-600 disabled:opacity-50" x-text="authButton()"></button>
     </form>
-
-    <div class="mt-8 flex flex-col items-center gap-2 text-sm text-ink-soft dark:text-ink-darksoft">
-      <button x-show="authMode === 'login'" @click="switchAuth('reset')" class="hover:text-sage-600">Passwort vergessen?</button>
-      <button x-show="authMode === 'reset'" @click="switchAuth('login')" class="hover:text-sage-600">Zurück zur <span class="underline underline-offset-4">Anmeldung</span></button>
-      <p x-show="authMode === 'login'" class="mt-4 max-w-xs text-center text-xs leading-relaxed">Noch kein Konto? Zugänge vergibt dein Admin.</p>
-    </div>
   </section>
 
   <!-- Kein Zugriff -->
-  <section x-show="view === 'noaccess'" x-cloak class="fade-enter rounded-4xl bg-card p-8 shadow-sm dark:bg-card-dark">
-    <h1 class="font-serif text-2xl">Noch nicht freigeschaltet</h1>
-    <p class="mt-3 leading-relaxed text-ink-soft dark:text-ink-darksoft">Dein Konto <span class="text-ink dark:text-ink-dark" x-text="user?.email"></span> hat noch keinen Zugriff auf DailyMind. Sobald ein Admin dich freischaltet, kannst du hier direkt loslegen.</p>
-    <button @click="checkAccess()" class="mt-6 rounded-full border border-line px-5 py-2.5 text-sm hover:border-sage-500 dark:border-line-dark">Erneut prüfen</button>
+  <section x-show="view === 'noaccess'" x-cloak class="gate fade-enter">
+    <div class="card">
+      <h2>Noch nicht freigeschaltet</h2>
+      <p class="lead">Dein Konto <b x-text="user?.email"></b> hat noch keinen Zugriff auf DailyMind. Sobald ein Admin dich freischaltet, kannst du hier direkt loslegen.</p>
+      <button @click="checkAccess()" type="button" class="btn ghost wide">Erneut prüfen</button>
+    </div>
   </section>
 
   <!-- ============================================================== -->
@@ -200,189 +379,218 @@
   <!-- ============================================================== -->
   <main x-show="view === 'app'" x-cloak>
 
-    <!-- Aktuelle Uhrzeit und Datum -->
-    <div class="mb-8 text-center" aria-live="off">
-      <p class="font-serif text-5xl font-light tracking-tight tabular-nums" x-text="clockTime()"></p>
-      <p class="mt-2 text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="clockDate()"></p>
-    </div>
-
     <!-- Navigation -->
-    <nav class="mb-10 flex rounded-full bg-line/50 p-1 text-sm dark:bg-line-dark/70">
-      <button @click="tab = 'today'" :class="tab === 'today' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="flex-1 rounded-full py-2 transition">Tagebuch</button>
-      <button @click="openArchive()" :class="tab === 'archive' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="flex-1 rounded-full py-2 transition">Archiv</button>
+    <nav class="seg tabs" aria-label="Bereich">
+      <button @click="tab = 'today'" :aria-pressed="tab === 'today'" type="button">Tagebuch</button>
+      <button @click="openArchive()" :aria-pressed="tab === 'archive'" type="button">Archiv</button>
     </nav>
 
     <!-- -------------------------- Tagebuch -------------------------- -->
     <section x-show="tab === 'today'" class="fade-enter">
 
       <!-- Erinnerungen sind in den Kontoeinstellungen an, aber dieses Gerät hat noch kein Push-Abo -->
-      <div x-show="pushHint" x-cloak class="mb-8 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-3xl bg-sage-50 p-5 text-sm dark:bg-sage-700/20">
-        <p class="min-w-[12rem] flex-1">🔔 Deine Erinnerungen sind eingeschaltet. Erlaube Benachrichtigungen, damit sie auch auf diesem Gerät ankommen.</p>
-        <div class="flex items-center gap-3">
-          <button @click="dismissPushHint()" type="button" class="text-ink-soft hover:text-ink dark:text-ink-darksoft dark:hover:text-ink-dark">Nicht jetzt</button>
-          <button @click="enablePush()" type="button" class="rounded-full bg-sage-500 px-4 py-2 text-white transition hover:bg-sage-600">Aktivieren</button>
+      <div x-show="pushHint" x-cloak class="card note">
+        <p><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>Deine Erinnerungen sind eingeschaltet. Erlaube Benachrichtigungen, damit sie auch auf diesem Gerät ankommen.</p>
+        <div class="acts2">
+          <button @click="dismissPushHint()" type="button" class="btn ghost">Nicht jetzt</button>
+          <button @click="enablePush()" type="button" class="btn">Aktivieren</button>
         </div>
       </div>
 
       <!-- Datum -->
-      <div class="flex items-center justify-between">
-        <button @click="shiftDay(-1)" class="rounded-full p-2 text-ink-soft hover:bg-line/60 dark:text-ink-darksoft dark:hover:bg-line-dark" aria-label="Vorheriger Tag">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>
+      <div class="day">
+        <button @click="shiftDay(-1)" class="icon-btn" type="button" aria-label="Vorheriger Tag">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
         </button>
-        <div class="text-center">
-          <p class="text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="date === today() ? 'Heute' : weekday(date)"></p>
-          <h2 class="mt-1 font-serif text-3xl font-light tracking-tight" x-text="longDate(date)"></h2>
-          <button x-show="date !== today()" @click="goTo(today())" class="mt-1 text-xs text-sage-600 hover:underline dark:text-sage-300">Zu heute</button>
+        <div class="mid">
+          <p class="eyebrow" x-text="date === today() ? 'Heute' : weekday(date)"></p>
+          <h2 x-text="longDate(date)"></h2>
+          <button x-show="date !== today()" @click="goTo(today())" type="button" class="link">Zu heute</button>
         </div>
-        <button @click="shiftDay(1)" :disabled="date >= today()" class="rounded-full p-2 text-ink-soft hover:bg-line/60 disabled:opacity-20 dark:text-ink-darksoft dark:hover:bg-line-dark" aria-label="Nächster Tag">
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
+        <button @click="shiftDay(1)" :disabled="date >= today()" class="icon-btn" type="button" aria-label="Nächster Tag">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
         </button>
       </div>
 
       <!-- Morgen / Abend -->
-      <div class="mx-auto mt-8 flex w-fit gap-6 text-sm">
-        <button @click="part = 'morning'" class="flex items-center gap-2 border-b pb-1 transition" :class="part === 'morning' ? 'border-sand-500 text-ink dark:text-ink-dark' : 'border-transparent text-ink-soft dark:text-ink-darksoft'">
-          <span>☀︎</span> Morgen <span x-show="entry.morning_done_at" class="h-1.5 w-1.5 rounded-full bg-sand-500"></span>
+      <div class="seg parts" role="group" aria-label="Tageszeit">
+        <button @click="part = 'morning'" :aria-pressed="part === 'morning'" type="button">
+          <svg class="ic sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>
+          Morgen <span x-show="entry.morning_done_at" class="dot sun" title="ausgefüllt"></span>
         </button>
-        <button @click="part = 'evening'" class="flex items-center gap-2 border-b pb-1 transition" :class="part === 'evening' ? 'border-dusk-500 text-ink dark:text-ink-dark' : 'border-transparent text-ink-soft dark:text-ink-darksoft'">
-          <span>☾</span> Abend <span x-show="entry.evening_done_at" class="h-1.5 w-1.5 rounded-full bg-dusk-500"></span>
+        <button @click="part = 'evening'" :aria-pressed="part === 'evening'" type="button">
+          <svg class="ic moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+          Abend <span x-show="entry.evening_done_at" class="dot moon" title="ausgefüllt"></span>
         </button>
       </div>
 
-      <div x-show="loadingEntry" class="py-20 text-center"><div class="mx-auto h-2 w-2 animate-ping rounded-full bg-sage-500"></div></div>
+      <div x-show="loadingEntry" class="spin"></div>
 
       <!-- Morgenroutine -->
-      <div x-show="!loadingEntry && part === 'morning'" class="fade-enter mt-8 space-y-6">
-        <article class="rounded-4xl bg-card p-7 shadow-sm dark:bg-card-dark">
-          <h3 class="font-serif text-lg">Wofür bin ich heute dankbar?</h3>
-          <template x-for="(_, i) in entry.gratitude" :key="'g' + i">
-            <div class="flex items-baseline gap-3">
-              <span class="w-4 text-sm text-sand-500" x-text="i + 1"></span>
-              <input type="text" maxlength="500" x-model="entry.gratitude[i]" @input="queueSave()" class="field" placeholder="…">
-            </div>
-          </template>
+      <div x-show="!loadingEntry && part === 'morning'" class="stack fade-enter">
+        <article class="card">
+          <div class="card-head">
+            <span class="badge-ic sun"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12.6 12 20l-7.5-7.4a4.6 4.6 0 0 1 7.5-5.3 4.6 4.6 0 0 1 7.5 5.3z"/></svg></span>
+            <h3>Wofür bin ich heute dankbar?</h3>
+          </div>
+          <div class="rows">
+            <template x-for="(_, i) in entry.gratitude" :key="'g' + i">
+              <div class="row">
+                <span class="n" x-text="i + 1"></span>
+                <input type="text" maxlength="500" x-model="entry.gratitude[i]" @input="queueSave()" class="field" placeholder="…" :aria-label="'Dankbar ' + (i + 1)">
+              </div>
+            </template>
+          </div>
         </article>
 
-        <article class="rounded-4xl bg-card p-7 shadow-sm dark:bg-card-dark">
-          <h3 class="font-serif text-lg">Was würde den heutigen Tag großartig machen?</h3>
-          <template x-for="(_, i) in entry.great_day" :key="'d' + i">
-            <div class="flex items-baseline gap-3">
-              <span class="w-4 text-sm text-sand-500" x-text="i + 1"></span>
-              <input type="text" maxlength="500" x-model="entry.great_day[i]" @input="queueSave()" class="field" placeholder="…">
-            </div>
-          </template>
+        <article class="card">
+          <div class="card-head">
+            <span class="badge-ic sun"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></span>
+            <h3>Was würde den heutigen Tag großartig machen?</h3>
+          </div>
+          <div class="rows">
+            <template x-for="(_, i) in entry.great_day" :key="'d' + i">
+              <div class="row">
+                <span class="n" x-text="i + 1"></span>
+                <input type="text" maxlength="500" x-model="entry.great_day[i]" @input="queueSave()" class="field" placeholder="…" :aria-label="'Großartig ' + (i + 1)">
+              </div>
+            </template>
+          </div>
         </article>
 
-        <article class="rounded-4xl bg-sand-100/70 p-7 dark:bg-card-dark">
-          <h3 class="font-serif text-lg">Positive Affirmation</h3>
-          <p class="mt-1 text-sm text-ink-soft dark:text-ink-darksoft">Ein Satz, der dich heute trägt.</p>
-          <textarea rows="2" maxlength="500" x-model="entry.affirmation" @input="queueSave()" class="field mt-2 font-serif text-xl italic" placeholder="Ich bin ruhig, klar und offen für das, was kommt."></textarea>
+        <article class="card">
+          <div class="card-head">
+            <span class="badge-ic sun"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8zM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg></span>
+            <div>
+              <h3>Positive Affirmation</h3>
+              <p class="hint">Ein Satz, der dich heute trägt.</p>
+            </div>
+          </div>
+          <div class="area">
+            <textarea rows="2" maxlength="500" x-model="entry.affirmation" @input="queueSave()" class="field affirm" placeholder="Ich bin ruhig, klar und offen für das, was kommt." aria-label="Positive Affirmation"></textarea>
+          </div>
         </article>
       </div>
 
       <!-- Abendroutine -->
-      <div x-show="!loadingEntry && part === 'evening'" x-cloak class="fade-enter mt-8 space-y-6">
-        <article class="rounded-4xl bg-card p-7 shadow-sm dark:bg-card-dark">
-          <h3 class="font-serif text-lg">Was lief heute gut?</h3>
-          <p class="mt-1 text-sm text-ink-soft dark:text-ink-darksoft">Kleine Erfolge zählen doppelt.</p>
-          <template x-for="(_, i) in entry.went_well" :key="'w' + i">
-            <div class="flex items-baseline gap-3">
-              <span class="w-4 text-sm text-dusk-500" x-text="i + 1"></span>
-              <input type="text" maxlength="500" x-model="entry.went_well[i]" @input="queueSave()" class="field" placeholder="…">
+      <div x-show="!loadingEntry && part === 'evening'" x-cloak class="stack fade-enter">
+        <article class="card">
+          <div class="card-head">
+            <span class="badge-ic moon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <div>
+              <h3>Was lief heute gut?</h3>
+              <p class="hint">Kleine Erfolge zählen doppelt.</p>
             </div>
-          </template>
+          </div>
+          <div class="rows">
+            <template x-for="(_, i) in entry.went_well" :key="'w' + i">
+              <div class="row">
+                <span class="n" x-text="i + 1"></span>
+                <input type="text" maxlength="500" x-model="entry.went_well[i]" @input="queueSave()" class="field" placeholder="…" :aria-label="'Lief gut ' + (i + 1)">
+              </div>
+            </template>
+          </div>
         </article>
 
-        <article class="rounded-4xl bg-card p-7 shadow-sm dark:bg-card-dark">
-          <h3 class="font-serif text-lg">Was habe ich heute Gutes für jemanden getan?</h3>
-          <p class="mt-1 text-sm text-ink-soft dark:text-ink-darksoft">Auch kleine Gesten machen einen Unterschied.</p>
-          <textarea rows="3" maxlength="2000" x-model="entry.learned" @input="queueSave()" class="field mt-2" placeholder="…"></textarea>
+        <article class="card">
+          <div class="card-head">
+            <span class="badge-ic moon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12.6 12 20l-7.5-7.4a4.6 4.6 0 0 1 7.5-5.3 4.6 4.6 0 0 1 7.5 5.3z"/></svg></span>
+            <div>
+              <h3>Was habe ich heute Gutes für jemanden getan?</h3>
+              <p class="hint">Auch kleine Gesten machen einen Unterschied.</p>
+            </div>
+          </div>
+          <div class="area">
+            <textarea rows="3" maxlength="2000" x-model="entry.learned" @input="queueSave()" class="field" placeholder="…" aria-label="Gutes getan"></textarea>
+          </div>
         </article>
 
-        <article class="rounded-4xl bg-dusk-100/60 p-7 dark:bg-card-dark">
-          <h3 class="font-serif text-lg">Wie war dein Tag?</h3>
-          <div class="mt-5 flex justify-between">
+        <article class="card">
+          <div class="card-head">
+            <span class="badge-ic moon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9z"/></svg></span>
+            <h3>Wie war dein Tag?</h3>
+          </div>
+          <div class="moods" role="group" aria-label="Stimmung">
             <template x-for="m in moods" :key="m.value">
-              <button @click="entry.mood = entry.mood === m.value ? null : m.value; queueSave()" :title="m.label"
-                      class="flex flex-col items-center gap-1.5 rounded-2xl px-2 py-2 transition"
-                      :class="entry.mood === m.value ? 'bg-card shadow-sm dark:bg-line-dark' : 'opacity-50 hover:opacity-90'">
-                <span class="text-2xl" x-text="m.icon"></span>
-                <span class="text-[11px] text-ink-soft dark:text-ink-darksoft" x-text="m.label"></span>
+              <button @click="entry.mood = entry.mood === m.value ? null : m.value; queueSave()" :aria-pressed="entry.mood === m.value" type="button">
+                <span x-html="IC[m.icon]" style="display:contents"></span>
+                <span x-text="m.label"></span>
               </button>
             </template>
           </div>
 
-          <div class="mt-8">
-            <div class="flex items-center justify-between text-sm">
-              <span>Energie</span>
-              <span class="text-ink-soft dark:text-ink-darksoft" x-text="entry.energy ? energyLabels[entry.energy - 1] : 'noch offen'"></span>
-            </div>
-            <input type="range" min="1" max="5" step="1" :value="entry.energy ?? 3" @input="entry.energy = +$event.target.value; queueSave()" class="mt-3 w-full" :class="entry.energy ? '' : 'opacity-40'">
-            <div class="mt-1 flex justify-between text-[11px] text-ink-soft dark:text-ink-darksoft"><span>leer</span><span>voller Energie</span></div>
+          <div class="energy">
+            <div class="top">Energie <span x-text="entry.energy ? energyLabels[entry.energy - 1] : 'noch offen'"></span></div>
+            <input type="range" min="1" max="5" step="1" :value="entry.energy ?? 3" @input="entry.energy = +$event.target.value; queueSave()" :class="entry.energy ? '' : 'unset'" aria-label="Energie">
+            <div class="scale"><span>leer</span><span>voller Energie</span></div>
           </div>
         </article>
       </div>
 
       <!-- Kompliment, sobald alle Felder der Routine ausgefüllt sind -->
-      <div x-show="!loadingEntry && complete(part)" x-cloak x-transition:enter="transition duration-700 ease-out" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-           class="mt-8 rounded-4xl p-7 text-center" :class="part === 'morning' ? 'bg-sage-50 dark:bg-sage-700/20' : 'bg-dusk-100/60 dark:bg-dusk-500/15'">
-        <p class="text-2xl" x-text="part === 'morning' ? '🌱' : '🌙'"></p>
-        <p class="mt-2 font-serif text-xl" x-text="compliment(part).title"></p>
-        <p class="mt-1 text-sm text-ink-soft dark:text-ink-darksoft" x-text="compliment(part).text"></p>
+      <div x-show="!loadingEntry && complete(part)" x-cloak x-transition.opacity.duration.500ms class="card praise" style="margin-top: 12px">
+        <span class="badge-ic" :class="part === 'morning' ? 'sun' : 'moon'">
+          <svg x-show="part === 'morning'" class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8zM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
+          <svg x-show="part === 'evening'" class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9zM19 3v4M21 5h-4"/></svg>
+        </span>
+        <div>
+          <b x-text="compliment(part).title"></b>
+          <span x-text="compliment(part).text"></span>
+        </div>
       </div>
 
       <!-- Speicherstatus -->
-      <p class="mt-8 text-center text-xs text-ink-soft dark:text-ink-darksoft" x-text="saveStatus()"></p>
+      <p class="status" :class="saveState === 'error' && 'err'" x-text="saveStatus()" aria-live="polite"></p>
     </section>
 
     <!-- --------------------------- Archiv --------------------------- -->
     <section x-show="tab === 'archive'" x-cloak class="fade-enter">
-      <div class="flex items-center justify-between">
-        <h2 class="font-serif text-3xl font-light tracking-tight">Archiv</h2>
-        <div class="flex rounded-full bg-line/50 p-1 text-xs dark:bg-line-dark/70">
-          <button @click="archiveMode = 'list'" :class="archiveMode === 'list' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="rounded-full px-3 py-1.5">Liste</button>
-          <button @click="archiveMode = 'calendar'" :class="archiveMode === 'calendar' ? 'bg-card shadow-sm dark:bg-card-dark' : 'text-ink-soft dark:text-ink-darksoft'" class="rounded-full px-3 py-1.5">Kalender</button>
+      <div class="arch-head">
+        <h2>Archiv</h2>
+        <div class="seg small" role="group" aria-label="Ansicht">
+          <button @click="archiveMode = 'list'" :aria-pressed="archiveMode === 'list'" type="button">Liste</button>
+          <button @click="archiveMode = 'calendar'" :aria-pressed="archiveMode === 'calendar'" type="button">Kalender</button>
         </div>
       </div>
 
-      <div x-show="archiveLoading" class="py-20 text-center"><div class="mx-auto h-2 w-2 animate-ping rounded-full bg-sage-500"></div></div>
+      <div x-show="archiveLoading" class="spin"></div>
 
-      <p x-show="!archiveLoading && archive.length === 0" class="py-20 text-center text-ink-soft dark:text-ink-darksoft">Noch keine Einträge. Dein erster wartet unter „Tagebuch“.</p>
+      <p x-show="!archiveLoading && archive.length === 0" class="empty">Noch keine Einträge. Dein erster wartet unter „Tagebuch“.</p>
 
       <!-- Liste -->
-      <div x-show="!archiveLoading && archiveMode === 'list'" class="mt-8 space-y-10">
+      <div x-show="!archiveLoading && archiveMode === 'list'">
         <template x-for="group in archiveByMonth()" :key="group.key">
           <div>
-            <p class="mb-3 text-xs uppercase tracking-[0.2em] text-ink-soft dark:text-ink-darksoft" x-text="group.label"></p>
-            <div class="space-y-3">
+            <p class="group-label" x-text="group.label"></p>
+            <div class="card list">
               <template x-for="e in group.entries" :key="e.id">
-                <div class="rounded-3xl bg-card shadow-sm transition hover:shadow-md dark:bg-card-dark">
-                  <div class="flex items-stretch">
-                    <button @click="goTo(e.entry_date)" class="min-w-0 flex-1 rounded-3xl p-5 pr-1 text-left">
-                      <div class="flex items-center justify-between">
-                        <span class="font-serif" x-text="shortDate(e.entry_date)"></span>
-                        <span class="flex items-center gap-2">
-                          <span x-show="e.morning_done_at" class="h-1.5 w-1.5 rounded-full bg-sand-500" title="Morgen"></span>
-                          <span x-show="e.evening_done_at" class="h-1.5 w-1.5 rounded-full bg-dusk-500" title="Abend"></span>
-                          <span x-show="e.mood" x-text="moodIcon(e.mood)"></span>
-                        </span>
-                      </div>
-                      <p x-show="e.affirmation" class="mt-2 font-serif italic text-ink-soft dark:text-ink-darksoft" x-text="'„' + e.affirmation + '“'"></p>
-                      <p x-show="!e.affirmation && firstFilled(e)" class="mt-2 truncate text-sm text-ink-soft dark:text-ink-darksoft" x-text="firstFilled(e)"></p>
+                <div class="entry">
+                  <div class="line">
+                    <button @click="goTo(e.entry_date)" type="button" class="open">
+                      <span class="txt">
+                        <span class="date" x-text="shortDate(e.entry_date)"></span>
+                        <span x-show="e.affirmation" class="snip q" x-text="'„' + e.affirmation + '“'"></span>
+                        <span x-show="!e.affirmation && firstFilled(e)" class="snip" x-text="firstFilled(e)"></span>
+                      </span>
+                      <span class="meta">
+                        <span x-show="e.morning_done_at" class="dot sun" title="Morgen"></span>
+                        <span x-show="e.evening_done_at" class="dot moon" title="Abend"></span>
+                        <span x-show="e.mood" x-html="moodIcon(e.mood)" style="display:contents"></span>
+                        <svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                      </span>
                     </button>
                     <!-- Löschen: erst Sicherheitsabfrage, dann nur dieser eine Eintrag -->
-                    <button @click="confirmDelete = e.id" x-show="confirmDelete !== e.id" type="button"
-                            class="flex w-12 flex-none items-center justify-center rounded-r-3xl text-ink-soft/50 transition hover:text-[#B4533C] focus-visible:text-[#B4533C] dark:text-ink-darksoft/50 dark:hover:text-[#E39A85]"
+                    <button @click="confirmDelete = e.id" x-show="confirmDelete !== e.id" type="button" class="del"
                             :aria-label="'Eintrag vom ' + shortDate(e.entry_date) + ' löschen'" title="Eintrag löschen">
-                      <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>
+                      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>
                     </button>
                   </div>
                   <div x-show="confirmDelete === e.id" x-cloak x-transition.opacity.duration.150ms @keydown.escape="confirmDelete = null"
-                       class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-3 text-sm dark:border-line-dark" role="alertdialog" :aria-label="'Eintrag vom ' + shortDate(e.entry_date) + ' löschen?'">
-                    <span>Eintrag endgültig löschen?</span>
-                    <span class="flex gap-2">
-                      <button @click="confirmDelete = null" type="button" class="rounded-full border border-line px-4 py-1.5 hover:border-sage-500 dark:border-line-dark">Abbrechen</button>
-                      <button @click="deleteEntry(e)" :disabled="deleting" type="button" class="rounded-full bg-[#B4533C] px-4 py-1.5 text-white transition hover:bg-[#9C4532] disabled:opacity-50" x-text="deleting ? 'Löscht …' : 'Löschen'"></button>
+                       class="confirm" role="alertdialog" :aria-label="'Eintrag vom ' + shortDate(e.entry_date) + ' löschen?'">
+                    Eintrag endgültig löschen?
+                    <span>
+                      <button @click="confirmDelete = null" type="button" class="btn ghost">Abbrechen</button>
+                      <button @click="deleteEntry(e)" :disabled="deleting" type="button" class="btn red" x-text="deleting ? 'Löscht …' : 'Löschen'"></button>
                     </span>
                   </div>
                 </div>
@@ -393,39 +601,35 @@
       </div>
 
       <!-- Kalender -->
-      <div x-show="!archiveLoading && archiveMode === 'calendar'" x-cloak class="mt-8 rounded-4xl bg-card p-6 shadow-sm dark:bg-card-dark">
-        <div class="flex items-center justify-between">
-          <button @click="shiftMonth(-1)" class="rounded-full p-2 text-ink-soft hover:bg-line/60 dark:text-ink-darksoft dark:hover:bg-line-dark" aria-label="Vorheriger Monat">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>
+      <div x-show="!archiveLoading && archiveMode === 'calendar'" x-cloak class="card cal">
+        <div class="cal-head">
+          <button @click="shiftMonth(-1)" class="icon-btn" type="button" aria-label="Vorheriger Monat">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
           </button>
-          <span class="font-serif text-lg" x-text="monthLabel(calMonth)"></span>
-          <button @click="shiftMonth(1)" class="rounded-full p-2 text-ink-soft hover:bg-line/60 dark:text-ink-darksoft dark:hover:bg-line-dark" aria-label="Nächster Monat">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
+          <b x-text="monthLabel(calMonth)"></b>
+          <button @click="shiftMonth(1)" class="icon-btn" type="button" aria-label="Nächster Monat">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
           </button>
         </div>
-        <div class="mt-4 grid grid-cols-7 text-center text-[11px] uppercase tracking-wider text-ink-soft dark:text-ink-darksoft">
-          <template x-for="d in ['Mo','Di','Mi','Do','Fr','Sa','So']"><span class="py-2" x-text="d"></span></template>
+        <div class="wk">
+          <template x-for="d in ['Mo','Di','Mi','Do','Fr','Sa','So']"><span x-text="d"></span></template>
         </div>
-        <div class="grid grid-cols-7 gap-1">
+        <div class="days">
           <template x-for="cell in calendarCells()" :key="cell.key">
-            <button :disabled="!cell.iso || cell.iso > today()" @click="goTo(cell.iso)"
-                    class="flex aspect-square flex-col items-center justify-center rounded-2xl text-sm transition disabled:cursor-default"
-                    :class="[
-                      cell.iso === today() ? 'ring-1 ring-sage-500' : '',
-                      cell.entry ? 'bg-sage-50 hover:bg-sage-100 dark:bg-sage-700/20 dark:hover:bg-sage-700/30' : 'hover:bg-line/50 dark:hover:bg-line-dark',
-                      cell.iso && cell.iso > today() ? 'opacity-30' : ''
-                    ]">
+            <button :disabled="!cell.iso || cell.iso > today()" @click="goTo(cell.iso)" type="button"
+                    :class="{ today: cell.iso === today(), has: !!cell.entry, future: cell.iso && cell.iso > today() }"
+                    :aria-label="cell.iso ? longDate(cell.iso) : ''">
               <span x-text="cell.day"></span>
-              <span class="mt-1 flex h-1.5 gap-0.5">
-                <span x-show="cell.entry?.morning_done_at" class="h-1 w-1 rounded-full bg-sand-500"></span>
-                <span x-show="cell.entry?.evening_done_at" class="h-1 w-1 rounded-full bg-dusk-500"></span>
+              <span class="dots">
+                <span x-show="cell.entry?.morning_done_at" class="dot sun"></span>
+                <span x-show="cell.entry?.evening_done_at" class="dot moon"></span>
               </span>
             </button>
           </template>
         </div>
-        <div class="mt-5 flex justify-center gap-5 text-[11px] text-ink-soft dark:text-ink-darksoft">
-          <span class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-sand-500"></span>Morgen</span>
-          <span class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-dusk-500"></span>Abend</span>
+        <div class="legend">
+          <span><span class="dot sun"></span>Morgen</span>
+          <span><span class="dot moon"></span>Abend</span>
         </div>
       </div>
     </section>
@@ -490,8 +694,9 @@
       // Profilmenü
       ACCOUNT_URL,
       ADMIN_URL,
+      IC,
       menuOpen: false,
-      me: { name: '', initials: '', color: '#7C9A82', photo: null, admin: false },
+      me: { name: '', initials: '', color: AVATAR_COLORS[0], photo: null, admin: false },
 
       // Auth
       authMode: 'login',          // login | reset | recover
@@ -518,11 +723,11 @@
       calMonth: toISO(new Date()).slice(0, 7),
 
       moods: [
-        { value: 1, icon: '🌧', label: 'schwer' },
-        { value: 2, icon: '☁️', label: 'trüb' },
-        { value: 3, icon: '⛅', label: 'okay' },
-        { value: 4, icon: '🌤', label: 'gut' },
-        { value: 5, icon: '☀️', label: 'strahlend' },
+        { value: 1, icon: 'rain',     label: 'schwer' },
+        { value: 2, icon: 'cloud',    label: 'trüb' },
+        { value: 3, icon: 'cloudSun', label: 'okay' },
+        { value: 4, icon: 'sunDim',   label: 'gut' },
+        { value: 5, icon: 'sun',      label: 'strahlend' },
       ],
       energyLabels: ['sehr niedrig', 'niedrig', 'mittel', 'hoch', 'voller Energie'],
 
@@ -583,7 +788,7 @@
       reset() {
         this.user = null;
         this.menuOpen = false;
-        this.me = { name: '', initials: '', color: '#7C9A82', photo: null, admin: false };
+        this.me = { name: '', initials: '', color: AVATAR_COLORS[0], photo: null, admin: false };
         this.entry = emptyEntry();
         this.archive = [];
         this.tab = 'today';
@@ -788,7 +993,7 @@
       compliment(p) { return pickSpruch(p, this.date); },
 
       clockTime() { return this.now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); },
-      clockDate() { return this.now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); },
+      clockDate() { return this.now.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }); },
 
       saveStatus() {
         return { idle: '', pending: 'Änderungen …', saving: 'Speichert …', saved: 'Gespeichert', error: 'Speichern fehlgeschlagen. Bitte prüfe deine Verbindung.' }[this.saveState];
@@ -891,7 +1096,7 @@
       longDate: s => fmt(s, { day: 'numeric', month: 'long' }),
       shortDate: s => fmt(s, { weekday: 'short', day: 'numeric', month: 'long' }),
       monthLabel: ym => fmt(ym + '-01', { month: 'long', year: 'numeric' }),
-      moodIcon(v) { return this.moods.find(m => m.value === v)?.icon || ''; },
+      moodIcon(v) { return IC[this.moods.find(m => m.value === v)?.icon] || ''; },
 
       toggleTheme() {
         this.dark = !this.dark;

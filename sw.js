@@ -3,10 +3,10 @@
    - Bibliotheken/Schriften: aus dem Speicher
    - Supabase-Anfragen werden NICHT gespeichert (Tagebucheinträge bleiben privat)
    - Push: zeigt die tägliche Erinnerung, ein Tipp darauf öffnet DailyMind */
-const P="dailymind-",V=P+"v5";
+const P="dailymind-",V=P+"v6";
 const CORE=['./','index.html','shared/ios-nav.js','sprueche.js','push.js','manifest.json','icon.svg','apple-touch-icon.png','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/favicon-32.png'];
-const EXTRA=["https://cdn.tailwindcss.com/3.4.16","https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js","https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js","https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap"];
-const CDN=/fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net|cdn\.tailwindcss\.com/;
+const EXTRA=["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js","https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"];
+const CDN=/cdn\.jsdelivr\.net/;
 self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open(V);await c.addAll(CORE);await Promise.allSettled(EXTRA.map(u=>c.add(u)));await self.skipWaiting();})());});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k.startsWith(P)&&k!==V)await caches.delete(k);await self.clients.claim();})());});
 self.addEventListener('fetch',e=>{
