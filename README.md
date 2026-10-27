@@ -85,7 +85,8 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
 ## Design
 
 Gleiche Designsprache wie das mvs2-Dashboard und „Zuhause“: Systemschrift, 12–22 px (Basis 14 px), weiße Karten auf
-`#f2f2f7`, im Dunkeln dunkelgraue Karten (`#1c1c1e`) auf Schwarz, Linien-Symbole statt Emojis. Die Farben stehen als
+`#f2f2f7`, im Dunkeln dunkelgraue Karten (`#1c1c1e`) auf Schwarz, Linien-Symbole statt Emojis. Überschriften und die Affirmation stehen in Apples Serifenschrift New York
+(`ui-serif`, sonst Georgia), der übrige Text in der Systemschrift. Die Farben stehen als
 CSS-Variablen oben in `index.html` (`--bg`, `--card`, `--well`, `--ink`, `--mute`, `--p1` …).
 
 - Akzent: Salbeigrün `#4a7356` (dunkel `#8fc49c`)
