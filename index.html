@@ -137,6 +137,9 @@
     .area:focus-within, .row:focus-within .n { color: var(--p1); }
     .area:focus-within { box-shadow: inset 0 0 0 1.5px var(--p1); }
     .affirm { font-family: var(--serif); font-style: italic; font-size: 17px; }
+    /* Überschriften in Apples Serifenschrift New York (auf Apple-Geräten über ui-serif), Fließtext bleibt SF.
+       Ohne New York greift Georgia bzw. die Serifenschrift des Systems. */
+    h1, .day h2, .arch-head h2, .gate h2, .card h3, .praise b, .cal-head b { font-family: var(--serif); letter-spacing: -.01em; }
 
     /* Stimmung und Energie */
     .moods { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; }
