@@ -17,6 +17,8 @@
 
   <!-- Dark Mode vor dem ersten Rendern setzen, damit nichts aufblitzt -->
   <script>
+    // Textfeld wächst mit dem Inhalt (Zeilenumbruch statt seitlich scrollen)
+    function grow(el) { el.style.height = 'auto'; if (el.scrollHeight) el.style.height = el.scrollHeight + 'px'; }
     try {
       // 'overall-theme' teilen sich alle Apps auf mvs2-bot.github.io
       const t = localStorage.getItem('overall-theme') || localStorage.getItem('dailymind-theme');
@@ -126,12 +128,13 @@
 
     /* Eingabezeilen wie in einer iOS-Liste: Nummer, Feld, Trennlinie */
     .rows { margin-top: 8px; }
-    .row { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--sep); }
+    .row { display: flex; align-items: flex-start; gap: 10px; border-top: 1px solid var(--sep); }
     .row:first-child { border-top: 0; }
-    .row .n { flex: none; width: 16px; font-size: 12px; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; text-align: center; }
+    .row .n { flex: none; width: 16px; padding-top: 11px; line-height: 21px; font-size: 12px; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; text-align: center; }
     .field { width: 100%; min-width: 0; padding: 11px 0; border: 0; background: none; outline: none; font-size: 15px; color: var(--ink); line-height: 1.4; }
     .field::placeholder { color: color-mix(in srgb, var(--mute) 60%, transparent); }
     textarea.field { resize: none; display: block; }
+    .row textarea.field { field-sizing: content; }
     .area { margin-top: 10px; padding: 2px 12px; border-radius: var(--radius-s); background: var(--well); }
     .area:focus-within, .row:focus-within .n { color: var(--p1); }
     .area:focus-within { box-shadow: inset 0 0 0 1.5px var(--p1); }
@@ -439,7 +442,7 @@
             <template x-for="(_, i) in entry.gratitude" :key="'g' + i">
               <div class="row">
                 <span class="n" x-text="i + 1"></span>
-                <input type="text" maxlength="500" x-model="entry.gratitude[i]" @input="queueSave()" class="field" placeholder="…" :aria-label="'Dankbar ' + (i + 1)">
+                <textarea rows="1" maxlength="500" x-model="entry.gratitude[i]" x-effect="entry.gratitude[i]; grow($el)" @focus="grow($el)" @keydown.enter.prevent @input="queueSave()" class="field" placeholder="…" :aria-label="'Dankbar ' + (i + 1)"></textarea>
               </div>
             </template>
           </div>
@@ -454,7 +457,7 @@
             <template x-for="(_, i) in entry.great_day" :key="'d' + i">
               <div class="row">
                 <span class="n" x-text="i + 1"></span>
-                <input type="text" maxlength="500" x-model="entry.great_day[i]" @input="queueSave()" class="field" placeholder="…" :aria-label="'Großartig ' + (i + 1)">
+                <textarea rows="1" maxlength="500" x-model="entry.great_day[i]" x-effect="entry.great_day[i]; grow($el)" @focus="grow($el)" @keydown.enter.prevent @input="queueSave()" class="field" placeholder="…" :aria-label="'Großartig ' + (i + 1)"></textarea>
               </div>
             </template>
           </div>
@@ -488,7 +491,7 @@
             <template x-for="(_, i) in entry.went_well" :key="'w' + i">
               <div class="row">
                 <span class="n" x-text="i + 1"></span>
-                <input type="text" maxlength="500" x-model="entry.went_well[i]" @input="queueSave()" class="field" placeholder="…" :aria-label="'Lief gut ' + (i + 1)">
+                <textarea rows="1" maxlength="500" x-model="entry.went_well[i]" x-effect="entry.went_well[i]; grow($el)" @focus="grow($el)" @keydown.enter.prevent @input="queueSave()" class="field" placeholder="…" :aria-label="'Lief gut ' + (i + 1)"></textarea>
               </div>
             </template>
           </div>
