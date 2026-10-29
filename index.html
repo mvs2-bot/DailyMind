@@ -77,8 +77,8 @@
     .bar .logo { width: 36px; height: 36px; flex: none; border-radius: 9px; }
     .bar .head { flex: 1; min-width: 0; }
     h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); line-height: 1.15; }
-    .sub { font-size: 12px; font-weight: 500; color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sub time::before { content: "·"; margin: 0 6px; }
+    .sub { font-size: 12px; font-weight: 500; color: var(--mute); font-variant-numeric: tabular-nums; text-wrap: balance; }
+    .sub time { display: block; }
     .acts { display: flex; gap: 8px; flex: none; }
     .icon-btn { position: relative; overflow: hidden; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--card); color: var(--ink); box-shadow: var(--shadow);
       display: inline-grid; place-items: center; padding: 0; transition: background .15s; }
