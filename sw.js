@@ -3,7 +3,7 @@
    - Bibliotheken/Schriften: aus dem Speicher
    - Supabase-Anfragen werden NICHT gespeichert (Tagebucheinträge bleiben privat)
    - Push: zeigt die tägliche Erinnerung, ein Tipp darauf öffnet DailyMind */
-const P="dailymind-",V=P+"v10";
+const P="dailymind-",V=P+"v11";
 const CORE=['./','index.html','shared/ios-nav.js','shared/streak.js','shared/streak.css','sprueche.js','push.js','manifest.json','icon.svg','apple-touch-icon.png','icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/favicon-32.png'];
 const EXTRA=["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js","https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"];
 const CDN=/cdn\.jsdelivr\.net/;
