@@ -14,10 +14,7 @@ sowie Stimmung und Energie. Mit Archiv (Liste und Kalender) und Dark Mode.
 | `sw.js`, `manifest.json` | App zum Installieren + Offline-Modus, zeigt Push-Erinnerungen. |
 | `docs/` | Screenshots der Oberfläche (Handy und Rechner, hell und dunkel). |
 | `icons/` | App-Icons (Startbildschirm, maskable, Favicon). |
-| `supabase/001_dailymind_schema.sql` | Tabelle `public.dailymind_entries`, RLS-Policies, App-Registrierung in `overall_apps`. |
-| `supabase/002_dailymind_push.sql` | Push-Erinnerungen: Einstellungen, Geräte-Abos, Cron-Job (rein additiv). |
-| `supabase/003_dailymind_push_vapid.sql` | VAPID-Schlüssel für Web Push im Vault. |
-| `supabase/functions/dailymind-push/` | Edge Function, die die Erinnerungen per Web Push verschickt. |
+| Datenbank, Edge Function | Liegen im Repo `supabase-core`: Migrationen `…_dailymind_core`, `…_dailymind_push`, `…_dailymind_push_vapid` und `supabase/functions/dailymind-push/`. |
 
 ## Datenmodell
 
@@ -74,12 +71,12 @@ Ein Eintrag pro User und Tag (`unique (user_id, entry_date)`):
 
 ### Einrichtung (einmalig)
 
-1. `supabase/002_dailymind_push.sql` im SQL-Editor ausführen. Legt nur neue Tabellen an; das Geheimnis für
+1. Migration `…_dailymind_push.sql` aus `supabase-core` einspielen. Legt nur neue Tabellen an; das Geheimnis für
    den Cron-Aufruf erzeugt das Skript selbst im Vault.
-2. `supabase/003_dailymind_push_vapid.sql` ausführen. Die VAPID-Schlüssel erzeugt die Edge Function dann beim
+2. Migration `…_dailymind_push_vapid.sql` aus `supabase-core` einspielen. Die VAPID-Schlüssel erzeugt die Edge Function dann beim
    ersten Aufruf selbst und speichert sie im Vault (eigene Schlüssel optional als Secrets `VAPID_PUBLIC_KEY`
    und `VAPID_PRIVATE_KEY`).
-3. Edge Function `dailymind-push` deployen, „Verify JWT“ ausschalten
+3. Edge Function `dailymind-push` aus `supabase-core` deployen, „Verify JWT“ ausschalten
    (`supabase functions deploy dailymind-push --no-verify-jwt`).
 
 ## Design

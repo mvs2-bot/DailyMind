@@ -1,6 +1,6 @@
 /* Streak – gemeinsame Schnittstelle und Anzeige für alle Seiten im Supabase-Core-Projekt.
    Original im Repo mvs2-bot.github.io (shared/streak.js + streak.css); DailyMind hat eine identische Kopie.
-   Gerechnet wird nur auf dem Server (supabase/001_streak.sql, Regeln in docs/STREAK.md).
+   Gerechnet wird nur auf dem Server (Migrationen …_streak im Repo supabase-core, Regeln in docs/STREAK.md).
    Hier: Daten holen/melden (mit localStorage nur als Cache) und darstellen. Kein Framework nötig.
 
    Benutzung (supabase-js geladen, Nutzer angemeldet, shared/streak.css eingebunden):
