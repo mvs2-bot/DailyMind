@@ -163,6 +163,20 @@
     .energy input.unset { opacity: .45; }
     .scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--mute); }
 
+    /* TschickTracking: Anzahl 0–5 mit Farbstrich, darunter Zusatzinfos zum Aufklappen */
+    .card-head .state { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--mute); }
+    .counts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 12px; }
+    .counts button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 2px 10px; border: 0; border-radius: var(--radius-s); background: var(--well);
+      color: var(--ink); font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .counts button i { width: 22px; height: 3px; border-radius: 2px; background: var(--c); }
+    .counts button[aria-pressed="true"] { background: var(--moon-soft); color: var(--moon); box-shadow: inset 0 0 0 1.5px var(--moon); }
+    .tags { margin-top: 14px; border-radius: var(--radius-s); background: var(--well); }
+    .tags summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 12px; cursor: pointer; list-style: none; font-size: 13px; font-weight: 600; color: var(--ink); }
+    .tags summary::-webkit-details-marker { display: none; }
+    .tags summary span { font-weight: 500; color: var(--mute); text-align: right; }
+    .tags label { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-top: 1px solid var(--sep); font-size: 14px; color: var(--ink); cursor: pointer; }
+    .tags input { width: 18px; height: 18px; margin: 0; accent-color: var(--moon); }
+
     /* Datumsleiste */
     .day { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .day .mid { text-align: center; min-width: 0; }
@@ -546,6 +560,28 @@
             <div class="scale"><span>leer</span><span>voller Energie</span></div>
           </div>
         </article>
+
+        <article x-show="tschickOn" class="card">
+          <div class="card-head">
+            <span class="badge-ic moon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h14v4H3zM17 14h4v4h-4M18 10c0-2-2-2-2-4s2-2 2-4M21 10c0-2-2-2-2-4"/></svg></span>
+            <h3>Wie viel hast du heute getschickt?</h3>
+            <span class="state" x-text="entry.tschick === null ? 'noch offen' : tschickLabel(entry.tschick)"></span>
+          </div>
+          <div class="counts" role="group" aria-label="Anzahl Tschick">
+            <template x-for="(c, n) in tschickColors" :key="n">
+              <button @click="entry.tschick = entry.tschick === n ? null : n; queueSave()" :aria-pressed="entry.tschick === n" :aria-label="tschickLabel(n)" :style="'--c:' + c" type="button">
+                <span x-text="n"></span><i></i>
+              </button>
+            </template>
+          </div>
+          <div class="scale" style="margin-top: 6px"><span>0 keine Tschick</span><span>5 oder mehr</span></div>
+          <details class="tags">
+            <summary>Zusatzinfos <span x-text="entry.tschick_tags.length ? entry.tschick_tags.join(', ') : 'Auswählen'"></span></summary>
+            <template x-for="t in tschickTags" :key="t">
+              <label><input type="checkbox" :value="t" x-model="entry.tschick_tags" @change="queueSave()"> <span x-text="t"></span></label>
+            </template>
+          </details>
+        </article>
       </div>
 
       <!-- Kompliment, sobald alle Felder der Routine ausgefüllt sind -->
@@ -674,6 +710,8 @@
     learned: '',
     mood: null,
     energy: null,
+    tschick: null,
+    tschick_tags: [],
     morning_done_at: null,
     evening_done_at: null,
   });
@@ -753,6 +791,11 @@
         { value: 5, icon: 'sun',      label: 'strahlend' },
       ],
       energyLabels: ['sehr niedrig', 'niedrig', 'mittel', 'hoch', 'voller Energie'],
+      // TschickTracking (Schalter in den Kontoeinstellungen, Standard aus)
+      tschickOn: false,
+      tschickColors: ['#6b8f71', '#d4a72c', '#d9963a', '#de7b4a', '#d0605e', '#c2525f'],
+      tschickTags: ['mit Alkohol', 'zum Kaffee', 'nach dem Essen', 'in Gesellschaft', 'bei Stress', 'aus Langeweile', 'in der Arbeit', 'beim Autofahren'],
+      tschickLabel(n) { return n === 0 ? 'keine Tschick' : n === 5 ? '5 oder mehr' : n === 1 ? '1 Stück' : n + ' Stück'; },
 
       // ------------------------------------------------------------
       // Start
@@ -876,6 +919,7 @@
           this.view = 'app';
           this.part = autoPart();
           this.checkPushHint();
+          this.loadTschickSetting();
           this.loadStreak();
           await this.loadEntry();
         } else {
@@ -906,6 +950,10 @@
           const { data } = await this.sb.from('dailymind_push_settings').select('morning_enabled, evening_enabled').maybeSingle();
           this.pushHint = !!(data?.morning_enabled || data?.evening_enabled);
         } catch (e) { console.error(e); }
+      },
+      async loadTschickSetting() {
+        const { data } = await this.sb.from('dailymind_push_settings').select('tschick_enabled').maybeSingle();
+        this.tschickOn = !!data?.tschick_enabled;
       },
       async enablePush() {
         try { await DailyMindPush.enable(this.sb); this.pushHint = false; }
@@ -996,6 +1044,7 @@
           went_well: padTo3(e.went_well),
           affirmation: e.affirmation || '',
           learned: e.learned || '',
+          tschick_tags: e.tschick_tags || [],
         };
         this.saveState = 'idle';
         this.lastSync = new Date();
@@ -1024,6 +1073,8 @@
           learned: e.learned.trim() || null,
           mood: e.mood,
           energy: e.energy,
+          tschick: e.tschick,
+          tschick_tags: e.tschick_tags,
           morning_done_at: morningFilled ? (e.morning_done_at || now) : null,
           evening_done_at: eveningFilled ? (e.evening_done_at || now) : null,
         };
