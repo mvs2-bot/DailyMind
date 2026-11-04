@@ -177,6 +177,13 @@
     .tags label { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-top: 1px solid var(--sep); font-size: 14px; color: var(--ink); cursor: pointer; }
     .tags input { width: 18px; height: 18px; margin: 0; accent-color: var(--moon); }
 
+    /* TrinkTracking: zwei Antworten, darunter „+alkoholisch“ als eigener Schalter */
+    .drink { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+    .drink button { padding: 12px 6px; border: 0; border-radius: var(--radius-s); background: var(--well); color: var(--ink); font-size: 14px; font-weight: 600; }
+    .drink button[aria-pressed="true"] { background: var(--moon-soft); color: var(--moon); box-shadow: inset 0 0 0 1.5px var(--moon); }
+    .drink .alc { grid-column: 1 / -1; background: none; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--mute); font-weight: 500; }
+    .drink .alc[aria-pressed="true"] { background: var(--moon-soft); color: var(--moon); font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--moon); }
+
     /* Datumsleiste */
     .day { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .day .mid { text-align: center; min-width: 0; }
@@ -561,6 +568,19 @@
           </div>
         </article>
 
+        <article x-show="drinksOn" class="card">
+          <div class="card-head">
+            <span class="badge-ic moon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l-1.6 16.2a2 2 0 0 1-2 1.8H9.6a2 2 0 0 1-2-1.8zM6.6 9h10.8"/></svg></span>
+            <h3>Heute genug getrunken?</h3>
+            <span class="state" x-text="drinkLabel()"></span>
+          </div>
+          <div class="drink" role="group" aria-label="Genug getrunken">
+            <button @click="entry.drank_enough = entry.drank_enough === false ? null : false; queueSave()" :aria-pressed="entry.drank_enough === false" type="button">Leider, nein</button>
+            <button @click="entry.drank_enough = entry.drank_enough === true ? null : true; queueSave()" :aria-pressed="entry.drank_enough === true" type="button">Ja, klar doch</button>
+            <button class="alc" @click="entry.drank_alcohol = !entry.drank_alcohol; queueSave()" :aria-pressed="entry.drank_alcohol === true" type="button">+ alkoholisch</button>
+          </div>
+        </article>
+
         <article x-show="tschickOn" class="card">
           <div class="card-head">
             <span class="badge-ic moon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h14v4H3zM17 14h4v4h-4M18 10c0-2-2-2-2-4s2-2 2-4M21 10c0-2-2-2-2-4"/></svg></span>
@@ -712,6 +732,8 @@
     energy: null,
     tschick: null,
     tschick_tags: [],
+    drank_enough: null,
+    drank_alcohol: false,
     morning_done_at: null,
     evening_done_at: null,
   });
@@ -793,6 +815,15 @@
       energyLabels: ['sehr niedrig', 'niedrig', 'mittel', 'hoch', 'voller Energie'],
       // TschickTracking (Schalter in den Kontoeinstellungen, Standard aus)
       tschickOn: false,
+      // TrinkTracking (Schalter in den Kontoeinstellungen, Standard aus)
+      drinksOn: false,
+      drinkLabel() {
+        const e = this.entry, p = [];
+        if (e.drank_enough === false) p.push('Leider, nein');
+        if (e.drank_enough === true) p.push('Ja, klar doch');
+        if (e.drank_alcohol) p.push('+alkoholisch');
+        return p.length ? p.join(' · ') : 'noch offen';
+      },
       tschickColors: ['#6b8f71', '#d4a72c', '#d9963a', '#de7b4a', '#d0605e', '#c2525f'],
       tschickTags: ['mit Alkohol', 'zum Kaffee', 'nach dem Essen', 'in Gesellschaft', 'bei Stress', 'aus Langeweile', 'in der Arbeit', 'beim Autofahren'],
       tschickLabel(n) { return n === 0 ? 'keine Tschick' : n === 5 ? '5 oder mehr' : n === 1 ? '1 Stück' : n + ' Stück'; },
@@ -954,6 +985,9 @@
       async loadTschickSetting() {
         const { data } = await this.sb.from('dailymind_push_settings').select('tschick_enabled').maybeSingle();
         this.tschickOn = !!data?.tschick_enabled;
+        // eigene Abfrage: fehlt die Spalte noch, bleibt nur TrinkTracking aus
+        const { data: d2 } = await this.sb.from('dailymind_push_settings').select('drinks_enabled').maybeSingle();
+        this.drinksOn = !!d2?.drinks_enabled;
       },
       async enablePush() {
         try { await DailyMindPush.enable(this.sb); this.pushHint = false; }
@@ -1045,6 +1079,7 @@
           affirmation: e.affirmation || '',
           learned: e.learned || '',
           tschick_tags: e.tschick_tags || [],
+          drank_alcohol: !!e.drank_alcohol,
         };
         this.saveState = 'idle';
         this.lastSync = new Date();
@@ -1078,6 +1113,8 @@
           morning_done_at: morningFilled ? (e.morning_done_at || now) : null,
           evening_done_at: eveningFilled ? (e.evening_done_at || now) : null,
         };
+        // Spalten nur mitschicken, wenn TrinkTracking an ist (dann gibt es sie auch in der Datenbank)
+        if (this.drinksOn) { row.drank_enough = e.drank_enough; row.drank_alcohol = e.drank_alcohol; }
 
         this.saveState = 'saving';
         const { data, error } = await this.sb
