@@ -36,7 +36,7 @@
       --bg: #f2f2f7; --card: #fff; --well: #f2f2f7; --hover: #e9e9ef; --line: #e2e2e7; --sep: rgba(60, 60, 67, .14);
       --ink: #1c1c1e; --text: #3a3a3c; --mute: #6c6c70;
       --p1: #4a7356; --p1-soft: #e7f0e9; --on-p1: #fff;
-      --sun: #b25000; --sun-soft: #fff1e0; --moon: #5856d6; --moon-soft: #ececfb;
+      --sun: #b25000; --sun-soft: #fff1e0; --moon: var(--p1); --moon-soft: var(--p1-soft); /* Abend in Salbeigrün */
       --star: var(--sun); /* Flamme der Streak-Anzeige (shared/streak.css) */
       --ok: #248a3d; --danger: #d70015; --danger-soft: #ffe6e8;
       --radius: 18px; --radius-s: 12px; --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 14px rgba(0, 0, 0, .04);
@@ -51,7 +51,7 @@
       color-scheme: dark; --bg: #000; --card: #1c1c1e; --well: #2c2c2e; --hover: #3a3a3c; --line: #38383a; --sep: rgba(84, 84, 88, .55);
       --ink: #f5f5f7; --text: #d1d1d6; --mute: #98989f;
       --p1: #8fc49c; --p1-soft: #15281a; --on-p1: #0d2614;
-      --sun: #ffb340; --sun-soft: #33240b; --moon: #9d9bff; --moon-soft: #1d1c3d;
+      --sun: #ffb340; --sun-soft: #33240b; --moon: var(--p1); --moon-soft: var(--p1-soft);
       --ok: #30d158; --danger: #ff6961; --danger-soft: #3a1412;
       --shadow: none; --pop: 0 16px 48px rgba(0, 0, 0, .6), 0 0 0 .5px rgba(255, 255, 255, .08);
     }
@@ -124,7 +124,7 @@
     /* Karten */
     .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
     .stack { display: grid; gap: 12px; margin-top: 14px; }
-    .card h3 { font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); line-height: 1.3; }
+    .card h3 { font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); line-height: 1.3; }
     .card .hint { font-size: 12px; color: var(--mute); margin-top: 2px; }
     .card-head { display: flex; align-items: center; gap: 10px; }
     .badge-ic { flex: none; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: var(--p1-soft); color: var(--p1); }
@@ -152,16 +152,16 @@
     /* Stimmung und Energie */
     .moods { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; }
     .moods button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 2px 8px; border: 0; border-radius: var(--radius-s); background: var(--well); color: var(--mute);
-      font-size: 11px; font-weight: 500; transition: background .15s, color .15s; }
+      font-size: 12px; font-weight: 400; transition: background .15s, color .15s; }
     .moods button:hover { color: var(--ink); }
     .moods button .ic { width: 24px; height: 24px; }
-    .moods button[aria-pressed="true"] { background: var(--moon-soft); color: var(--moon); font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--moon); }
+    .moods button[aria-pressed="true"] { background: var(--moon-soft); color: var(--moon); box-shadow: inset 0 0 0 1.5px var(--moon); }
     .energy { margin-top: 18px; }
     .energy .top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 600; color: var(--ink); }
     .energy .top span { font-weight: 500; color: var(--mute); font-size: 12px; }
     .energy input { width: 100%; height: 28px; margin: 6px 0 0; accent-color: var(--moon); }
     .energy input.unset { opacity: .45; }
-    .scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--mute); }
+    .scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--mute); }
 
     /* TschickTracking: Anzahl 0–5 mit Farbstrich, darunter Zusatzinfos zum Aufklappen */
     .card-head .state { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--mute); }
@@ -202,7 +202,7 @@
     .praise { display: flex; gap: 12px; align-items: center; }
     .praise .badge-ic { width: 40px; height: 40px; border-radius: 12px; }
     .praise .badge-ic .ic { width: 22px; height: 22px; }
-    .praise b { display: block; font-size: 16px; font-weight: 600; color: var(--ink); }
+    .praise b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
     .praise > div > span { display: block; font-size: 13px; color: var(--mute); }
     .status { margin-top: 14px; min-height: 18px; text-align: center; font-size: 12px; font-weight: 500; color: var(--mute); }
     .status.err { color: var(--danger); }
@@ -249,7 +249,7 @@
     .cal-head b { font-size: 16px; font-weight: 600; color: var(--ink); }
     .cal-head .icon-btn { background: var(--well); box-shadow: none; width: 32px; height: 32px; }
     .wk, .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .wk { margin-top: 10px; text-align: center; font-size: 11px; font-weight: 600; color: var(--mute); padding: 4px 0; }
+    .wk { margin-top: 10px; text-align: center; font-size: 12px; font-weight: 400; color: var(--mute); padding: 4px 0; }
     .days button { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 0; border-radius: 10px; background: none;
       font-size: 14px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; transition: background .15s; }
     .days button:not(:disabled):hover { background: var(--hover); }
@@ -258,7 +258,7 @@
     .days button.future { opacity: .3; }
     .days .dots { display: flex; gap: 3px; height: 5px; }
     .days .dot { width: 5px; height: 5px; }
-    .legend { display: flex; justify-content: center; gap: 16px; margin-top: 12px; font-size: 11px; font-weight: 500; color: var(--mute); }
+    .legend { display: flex; justify-content: center; gap: 16px; margin-top: 12px; font-size: 12px; font-weight: 400; color: var(--mute); }
     .legend span { display: inline-flex; align-items: center; gap: 5px; }
 
     /* Anmeldung, Hinweise ohne App */
