@@ -273,6 +273,55 @@
     .msg.ok { background: var(--p1-soft); color: var(--p1); }
     code { font-size: 12px; padding: 1px 5px; border-radius: 5px; background: var(--well); color: var(--ink); }
 
+    /* Profil-Seite (nur Handy): Kontomenü als eigene Seite */
+    .prof { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .prof .pm-menu { position: static; width: auto; max-width: none; padding: 8px; border-radius: var(--radius); box-shadow: var(--shadow); }
+    .prof .pm-head { flex-direction: column; text-align: center; gap: 10px; padding: 18px 10px 16px; }
+    .prof .pm-head > div { width: 100%; }
+    .prof .pm-ava { flex: none; width: 96px; height: 96px; font-size: 34px; box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--p1); }
+    .prof .pm-head b { font-size: 19px; }
+    .prof .pm-head small { margin-top: 2px; }
+    .prof .pm-role { margin-top: 8px; }
+    .prof .pm-item { min-height: 48px; font-size: 15px; }
+    .pm-theme { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 4px 4px 4px 10px; font-size: 15px; font-weight: 500; color: var(--ink); }
+    .pm-theme .ic { width: 18px; height: 18px; color: var(--mute); }
+    .pm-theme .seg { margin-left: auto; width: 170px; }
+    .prof-stats h3 { font-size: 15px; font-weight: 600; color: var(--ink); font-family: var(--serif); letter-spacing: -.01em; }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .stat-grid div { padding: 12px; border-radius: var(--radius-s); background: var(--well); }
+    .stat-grid b { display: block; font-size: 22px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .stat-grid span { font-size: 12px; font-weight: 500; color: var(--mute); }
+
+    /* Start hängt: Hinweis mit „Neu laden“ */
+    .stuck { max-width: 380px; margin: 0 auto; text-align: center; font-size: 13px; color: var(--mute); }
+    .stuck .btn { margin-top: 12px; }
+
+    /* Untere Tab-Leiste: NUR auf dem Handy (< 768 px). Darüber bleibt alles wie bisher. */
+    .tabbar { display: none; }
+    @media (max-width: 767.98px) {
+      /* Schwebende Leiste: abgerundete Karte mit Schatten, aktive Seite als Pille */
+      .tabbar { position: fixed; z-index: 45; left: calc(12px + env(safe-area-inset-left, 0px)); right: calc(12px + env(safe-area-inset-right, 0px));
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(3, 1fr);
+        height: 62px; padding: 0 6px; border-radius: 22px; background: var(--card);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, .16), 0 0 0 .5px rgba(0, 0, 0, .06); }
+      .dark .tabbar { background: #2c2c2e; box-shadow: 0 8px 28px rgba(0, 0, 0, .6), 0 0 0 .5px rgba(255, 255, 255, .1); }
+      .tabbar button { position: relative; z-index: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0; border: 0; background: none;
+        font-family: inherit; font-size: 11px; font-weight: 500; color: var(--text); }
+      .tabbar button .ic { width: 24px; height: 24px; }
+      .tabbar button[aria-current="page"]::before { content: ""; position: absolute; inset: 7px 6px; z-index: -1; border-radius: 16px; background: var(--p1-soft); }
+      .tabbar button[aria-current="page"] { color: var(--p1); font-weight: 600; }
+      .tabbar button[aria-current="page"] .ic { stroke-width: 2.2; }
+      .tabbar .bar-ava { position: relative; width: 26px; height: 26px; flex: 0 0 26px; font-size: 11px; overflow: visible; }
+      .tabbar .bar-ava img { border-radius: 50%; }
+      .tabbar .bar-ava .sync-dot { position: absolute; right: -2px; bottom: -2px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--card); background: var(--ok); }
+      .dark .tabbar .bar-ava .sync-dot { border-color: #2c2c2e; }
+      .tabbar .bar-ava .sync-dot.pending { background: #ff9f0a; } .tabbar .bar-ava .sync-dot.error { background: var(--danger); }
+      .tabbar [aria-current="page"] .bar-ava { box-shadow: 0 0 0 2px var(--p1); }
+      /* Segmente, Mond und Profilbild im Kopf übernimmt die Leiste unten */
+      .tabs, .acts.in-app .theme-btn, .acts.in-app .me { display: none !important; }
+      main { padding-top: 12px; padding-bottom: calc(62px + 36px + env(safe-area-inset-bottom, 0px)); }
+    }
+
     .spin { width: 18px; height: 18px; margin: 80px auto; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--mute); animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .fade-enter { animation: fade .3s ease both; }
@@ -283,7 +332,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-<script src="shared/ios-nav.js" defer></script>
+<script src="shared/ios-nav.js" data-bottom="84" defer></script>
   <script src="sprueche.js"></script>
   <script src="push.js"></script>
   <script src="shared/streak.js"></script>
@@ -324,10 +373,10 @@
       <div class="sub" x-show="view === 'app'" aria-live="off"><span x-text="clockDate()"></span><time x-text="clockTime()"></time></div>
       <div class="sub" x-show="view !== 'app'">Dein ruhiges Tagebuch</div>
     </div>
-    <div class="acts">
+    <div class="acts" :class="view === 'app' && 'in-app'">
       <!-- Streak (shared/streak.js füllt den Knopf; ausschaltbar in den Kontoeinstellungen) -->
       <button x-ref="streak" type="button" x-show="view === 'app' && streak && streak.enabled" x-cloak></button>
-      <button @click="toggleTheme()" class="icon-btn" type="button" :aria-label="dark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'" :title="dark ? 'Hell' : 'Dunkel'">
+      <button @click="toggleTheme()" class="icon-btn theme-btn" type="button" :aria-label="dark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'" :title="dark ? 'Hell' : 'Dunkel'">
         <svg x-show="!dark" class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
         <svg x-show="dark" x-cloak class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>
       </button>
@@ -368,7 +417,17 @@
 <div class="wrap">
 
   <!-- Laden -->
-  <section x-show="view === 'loading'" aria-label="Wird geladen"><div class="spin"></div></section>
+  <section x-show="view === 'loading'" aria-label="Wird geladen"><div class="spin"></div>
+    <div class="stuck" x-show="bootStuck" x-cloak>
+      <p>Der Start dauert ungewöhnlich lange. Vielleicht ist die Verbindung gerade schwach.</p>
+      <button type="button" class="btn" @click="location.reload()">Neu laden</button>
+    </div>
+  </section>
+  <!-- Fällt Alpine.js oder supabase-js vom CDN aus, zeigt ein eigenes Skript nach 8 s diesen Hinweis -->
+  <div id="bootFail" class="stuck" hidden style="margin-top: 80px">
+    <p>DailyMind konnte nicht starten. Bitte prüfe deine Verbindung.</p>
+    <button type="button" class="btn" onclick="location.reload()">Neu laden</button>
+  </div>
 
   <!-- Konfiguration fehlt -->
   <section x-show="view === 'config'" x-cloak class="gate fade-enter">
@@ -423,7 +482,7 @@
 
     <!-- Navigation -->
     <nav class="seg tabs" aria-label="Bereich">
-      <button @click="tab = 'today'" :aria-pressed="tab === 'today'" type="button">Tagebuch</button>
+      <button @click="openToday()" :aria-pressed="tab === 'today'" type="button">Tagebuch</button>
       <button @click="openArchive()" :aria-pressed="tab === 'archive'" type="button">Archiv</button>
     </nav>
 
@@ -710,8 +769,60 @@
         </div>
       </div>
     </section>
+
+    <!-- ---------------- Profil (nur Handy): Kontomenü als Seite ---------------- -->
+    <section x-show="tab === 'profile'" x-cloak class="prof fade-enter">
+      <div class="pm-menu">
+        <div class="pm-head">
+          <span class="pm-ava" :style="'background:' + me.color">
+            <template x-if="me.photo"><img :src="me.photo" alt=""></template>
+            <span x-show="!me.photo" x-text="me.initials"></span>
+          </span>
+          <div>
+            <b x-text="me.name"></b>
+            <small x-text="user?.email"></small>
+            <span class="pm-role" x-show="me.role" x-text="roleLabel(me.role)"></span>
+          </div>
+        </div>
+        <div class="pm-theme">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Darstellung
+          <div class="seg" role="group" aria-label="Darstellung">
+            <button type="button" :aria-pressed="!dark" @click="dark && toggleTheme()">Hell</button>
+            <button type="button" :aria-pressed="dark" @click="!dark && toggleTheme()">Dunkel</button>
+          </div>
+        </div>
+        <div class="pm-sync" role="status">
+          <i :class="syncLevel()"></i>
+          <span><b>Cloud-Sync</b> · <span x-text="syncText()"></span></span>
+        </div>
+        <a class="pm-item" href="/"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Dashboard</a>
+        <a class="pm-item" :href="ACCOUNT_URL"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Kontoeinstellungen</a>
+        <a class="pm-item" :href="ADMIN_URL" x-show="me.role === 'admin'"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>Admin-Einstellungen<small>nur Admins</small></a>
+        <div class="pm-sep"></div>
+        <button class="pm-item danger" type="button" @click="signOut()"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>Abmelden</button>
+      </div>
+
+      <!-- Monatsstatistik aus dem Archiv -->
+      <article class="card prof-stats">
+        <h3 x-text="monthLabel(today().slice(0, 7))"></h3>
+        <div class="stat-grid">
+          <div><b x-text="monthStats().days"></b><span>Tage mit Eintrag</span></div>
+          <div><b x-text="monthStats().morning"></b><span>Morgenroutinen</span></div>
+          <div><b x-text="monthStats().evening"></b><span>Abendroutinen</span></div>
+          <div><b x-text="monthStats().mood"></b><span>Stimmung im Schnitt</span></div>
+        </div>
+      </article>
+    </section>
   </main>
 </div>
+
+<!-- Untere Tab-Leiste (nur Handy, siehe CSS) -->
+<nav class="tabbar" aria-label="Navigation" x-show="view === 'app'" x-cloak>
+  <button type="button" @click="openToday()" :aria-current="tab === 'today' ? 'page' : null"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7.5h6"/></svg>Tagebuch</button>
+  <button type="button" @click="openArchive()" :aria-current="tab === 'archive' ? 'page' : null"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Archiv</button>
+  <button type="button" @click="openProfile()" :aria-current="tab === 'profile' ? 'page' : null">
+    <span class="pm-ava bar-ava" :style="'background:' + me.color"><template x-if="me.photo"><img :src="me.photo" alt=""></template><span x-show="!me.photo" x-text="me.initials"></span><span class="sync-dot" :class="syncLevel()"></span></span>Profil</button>
+</nav>
 
 <script>
   // ================================================================
@@ -748,6 +859,10 @@
     const { titles, texts } = SPRUECHE[p], n = dayNumber(iso);
     return { title: titles[n % titles.length], text: texts[n % texts.length] };
   };
+
+  // Hängt eine Abfrage (schwaches Netz, App aus dem Hintergrund), gilt sie nach ms als Netzfehler
+  const withTimeout = (p, ms) => Promise.race([Promise.resolve(p), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+  const mobileMq = matchMedia('(max-width: 767.98px)');
 
   const padTo3 = a => [...(a || []), '', '', ''].slice(0, 3);
   const clean = a => a.map(s => s.trim()).filter(Boolean);
@@ -795,6 +910,8 @@
       saveState: 'idle',          // idle | pending | saving | saved | error
       saveTimer: null,
       pushHint: false,
+      bootStuck: false,
+      restoreTab: null,  // Start hängt → „Neu laden“
       streak: null,     // Stand von streak_status (shared/streak.js)
 
       // Archiv
@@ -840,6 +957,23 @@
           return;
         }
         this.sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Start-Wächter: Nach 8 s ohne Ansicht selbst nach der Sitzung fragen, hängt auch das → „Neu laden“
+        setTimeout(async () => {
+          if (this.view !== 'loading') return;
+          try {
+            const { data: { session } } = await withTimeout(this.sb.auth.getSession(), 6000);
+            if (this.view !== 'loading') return;
+            if (session) { this.user = session.user; await this.checkAccess(); }
+            else this.view = 'auth';
+          } catch (e) { console.error(e); }
+          if (this.view === 'loading') this.bootStuck = true;
+        }, 8000);
+
+        // Offener Bereich bleibt beim Neuladen erhalten; Profil gibt es nur auf dem Handy
+        try { const t = sessionStorage.getItem('dailymind-tab'); if (t === 'archive' || (mobileMq.matches && t === 'profile')) this.restoreTab = t; } catch (_) {}
+        this.$watch('tab', t => { try { sessionStorage.setItem('dailymind-tab', t); } catch (_) {} });
+        mobileMq.addEventListener('change', e => { if (!e.matches && this.tab === 'profile') this.tab = 'today'; });
 
         this.sb.auth.onAuthStateChange((event, session) => {
           if (event === 'PASSWORD_RECOVERY') {
@@ -944,10 +1078,13 @@
 
       async checkAccess() {
         this.loadMe().catch(e => console.error(e));
-        const { data, error } = await this.sb.rpc('dailymind_is_member');
+        let data = null, error = null;
+        try { ({ data, error } = await withTimeout(this.sb.rpc('dailymind_is_member'), 10000)); }
+        catch (e) { console.error(e); if (this.view === 'auth') this.auth.error = 'Keine Verbindung. Bitte versuch es noch einmal.'; else this.bootStuck = true; return; }
         if (error) { console.error(error); }
         if (data === true) {
           this.view = 'app';
+          if (this.restoreTab) { const t = this.restoreTab; this.restoreTab = null; t === 'archive' ? this.openArchive() : this.openProfile(); }
           this.part = autoPart();
           this.checkPushHint();
           this.loadTschickSetting();
@@ -1062,11 +1199,14 @@
       // ------------------------------------------------------------
       async loadEntry() {
         this.loadingEntry = true;
-        const { data, error } = await this.sb
-          .from('dailymind_entries')
-          .select('*')
-          .eq('entry_date', this.date)
-          .maybeSingle();
+        let data = null, error = null;
+        try {
+          ({ data, error } = await withTimeout(this.sb
+            .from('dailymind_entries')
+            .select('*')
+            .eq('entry_date', this.date)
+            .maybeSingle(), 12000));
+        } catch (e) { error = e; }
         this.loadingEntry = false;
         if (error) { console.error(error); this.saveState = 'error'; return; }
         const e = data || {};
@@ -1160,14 +1300,38 @@
         if (iso <= this.today()) this.goTo(iso);
       },
 
+      // Seitenwechsel (Segmente am Desktop, Leiste am Handy) scrollt nach oben
+      openToday() { this.tab = 'today'; window.scrollTo({ top: 0 }); },
+      async openProfile() {
+        if (this.saveState === 'pending') await this.save();
+        this.tab = 'profile';
+        window.scrollTo({ top: 0 });
+        this.loadArchive();  // für die Monatsstatistik
+      },
+      monthStats() {
+        const m = this.today().slice(0, 7), list = this.archive.filter(e => e.entry_date.startsWith(m));
+        const moods = list.map(e => e.mood).filter(Boolean);
+        const avg = moods.length ? moods.reduce((a, b) => a + b, 0) / moods.length : 0;
+        return {
+          days: list.length,
+          morning: list.filter(e => e.morning_done_at).length,
+          evening: list.filter(e => e.evening_done_at).length,
+          mood: avg ? this.moods[Math.round(avg) - 1].label : '–',
+        };
+      },
+
       // ------------------------------------------------------------
       // Archiv
       // ------------------------------------------------------------
       async openArchive() {
         if (this.saveState === 'pending') await this.save();
         this.tab = 'archive';
+        window.scrollTo({ top: 0 });
         this.archiveMode = 'calendar';
         this.confirmDelete = null;
+        await this.loadArchive();
+      },
+      async loadArchive() {
         this.archiveLoading = this.archive.length === 0;
         const { data, error } = await this.sb
           .from('dailymind_entries')
@@ -1252,6 +1416,10 @@
       },
     };
   }
+</script>
+<script>
+  // Fehlt Alpine.js oder supabase-js (CDN nicht erreichbar), bleibt sonst nur die Kopfzeile stehen
+  setTimeout(() => { if (!window.Alpine || !window.supabase) document.getElementById('bootFail').hidden = false; }, 8000);
 </script>
 <script>
   if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
