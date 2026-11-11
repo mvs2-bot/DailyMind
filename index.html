@@ -19,6 +19,7 @@
   <script>
     // Textfeld wächst mit dem Inhalt (Zeilenumbruch statt seitlich scrollen)
     function grow(el) { el.style.height = 'auto'; if (el.scrollHeight) el.style.height = el.scrollHeight + 'px'; }
+    function nextField(el) { const fs = [...el.closest('.stack').querySelectorAll('textarea.field')]; const n = fs[fs.indexOf(el) + 1]; n ? n.focus() : el.blur(); }
     try {
       // 'overall-theme' teilen sich alle Apps auf mvs2-bot.github.io
       const t = localStorage.getItem('overall-theme') || localStorage.getItem('dailymind-theme');
@@ -538,7 +539,7 @@
             <template x-for="(_, i) in entry.gratitude" :key="'g' + i">
               <div class="row">
                 <span class="n" x-text="i + 1"></span>
-                <textarea rows="1" maxlength="500" x-model="entry.gratitude[i]" x-effect="entry.gratitude[i]; grow($el)" @focus="grow($el)" @keydown.enter.prevent @input="queueSave()" class="field" placeholder="…" :aria-label="'Dankbar ' + (i + 1)"></textarea>
+                <textarea rows="1" maxlength="500" x-model="entry.gratitude[i]" x-effect="entry.gratitude[i]; grow($el)" @focus="grow($el)" enterkeyhint="next" @keydown.enter.prevent="nextField($el)" @beforeinput="if ($event.inputType === 'insertLineBreak' || $event.inputType === 'insertParagraph') { $event.preventDefault(); nextField($el) }" @input="queueSave()" class="field" placeholder="…" :aria-label="'Dankbar ' + (i + 1)"></textarea>
               </div>
             </template>
           </div>
@@ -553,7 +554,7 @@
             <template x-for="(_, i) in entry.great_day" :key="'d' + i">
               <div class="row">
                 <span class="n" x-text="i + 1"></span>
-                <textarea rows="1" maxlength="500" x-model="entry.great_day[i]" x-effect="entry.great_day[i]; grow($el)" @focus="grow($el)" @keydown.enter.prevent @input="queueSave()" class="field" placeholder="…" :aria-label="'Großartig ' + (i + 1)"></textarea>
+                <textarea rows="1" maxlength="500" x-model="entry.great_day[i]" x-effect="entry.great_day[i]; grow($el)" @focus="grow($el)" enterkeyhint="next" @keydown.enter.prevent="nextField($el)" @beforeinput="if ($event.inputType === 'insertLineBreak' || $event.inputType === 'insertParagraph') { $event.preventDefault(); nextField($el) }" @input="queueSave()" class="field" placeholder="…" :aria-label="'Großartig ' + (i + 1)"></textarea>
               </div>
             </template>
           </div>
@@ -587,7 +588,7 @@
             <template x-for="(_, i) in entry.went_well" :key="'w' + i">
               <div class="row">
                 <span class="n" x-text="i + 1"></span>
-                <textarea rows="1" maxlength="500" x-model="entry.went_well[i]" x-effect="entry.went_well[i]; grow($el)" @focus="grow($el)" @keydown.enter.prevent @input="queueSave()" class="field" placeholder="…" :aria-label="'Lief gut ' + (i + 1)"></textarea>
+                <textarea rows="1" maxlength="500" x-model="entry.went_well[i]" x-effect="entry.went_well[i]; grow($el)" @focus="grow($el)" enterkeyhint="next" @keydown.enter.prevent="nextField($el)" @beforeinput="if ($event.inputType === 'insertLineBreak' || $event.inputType === 'insertParagraph') { $event.preventDefault(); nextField($el) }" @input="queueSave()" class="field" placeholder="…" :aria-label="'Lief gut ' + (i + 1)"></textarea>
               </div>
             </template>
           </div>
