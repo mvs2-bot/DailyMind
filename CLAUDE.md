@@ -6,7 +6,7 @@ Sprache in UI, Kommentaren, Doku und Commits: Deutsch. Ausführliche Nutzer-Doku
 
 ## Arbeitsweise (Token-Effizienz, verbindlich für jeden Worker)
 - Nicht das ganze Repo einlesen. Nur diese Datei + per `grep -n` gezielt die betroffenen Stellen öffnen.
-  `index.html` (~1430 Zeilen) nie komplett lesen, sondern über die Abschnitte unten anspringen.
+  `index.html` (~1670 Zeilen) nie komplett lesen, sondern über die Abschnitte unten anspringen.
 - Vor dem PR selbst prüfen (kein separater Test-Thread): Syntax (z. B. `node --check` für .js,
   Inline-Skripte), kaputte Referenzen/IDs/`x-ref`, Design-Konsistenz mit den Tokens unten, Hell + Dunkel.
 - Ändern sich Architektur, Dateistruktur oder Supabase-Schema dauerhaft: diese Datei im selben PR anpassen
@@ -29,15 +29,22 @@ Sprache in UI, Kommentaren, Doku und Commits: Deutsch. Ausführliche Nutzer-Doku
 
 ## Aufbau `index.html` (Orientierung, Zeilen ca.)
 - `19–31` Theme-Init vor dem Rendern (`localStorage['overall-theme']`, Fallback `dailymind-theme`).
-- `32–332` CSS (`<style>`): `:root`-Tokens, `[data-theme="dark"]`, Komponenten.
-- `334–340` Skripte: supabase-js `2.45.4`, Alpine `3.14.1` (jsDelivr), `ios-nav.js`, `sprueche.js`, `push.js`, `streak.js`.
-- `348–352` Konfiguration: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_ID = 'dailymind'`.
-- `343–827` Markup. Views über `view`: `loading`, `config`, `auth`, `noaccess`, `app`.
-  Im App-View Tabs über `tab`: `today`, `archive`, `profile`. Mobile Tab-Leiste `nav.tabbar`.
-- `828–883` Helfer: Datum (`toISO`/`fromISO`, immer lokale Zeit, nie UTC), `emptyEntry()`,
+- `32–388` CSS (`<style>`): `:root`-Tokens, `[data-theme="dark"]`, Komponenten, Rechner-Layout (`@media (min-width: 1100px)`).
+- `390–396` Skripte: supabase-js `2.45.4`, Alpine `3.14.1` (jsDelivr), `ios-nav.js`, `sprueche.js`, `push.js`, `streak.js`.
+- `404–408` Konfiguration: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `APP_ID = 'dailymind'`.
+- `410–1015` Markup. Views über `view`: `loading`, `config`, `auth`, `noaccess`, `app`.
+  Im App-View Tabs über `tab`: `today`, `archive`, `profile`. Mobile Tab-Leiste `nav.tabbar`, Tastenkürzel-Dialog `.keys`.
+- `1017–1072` Helfer: Datum (`toISO`/`fromISO`, immer lokale Zeit, nie UTC), `emptyEntry()`,
   `EVENING_FROM_HOUR = 15` (ab dann öffnet die Abendroutine), `pickSpruch`, `withTimeout`.
-- `884–1420` `dailyMind()`: Login, Profil/Avatar, Zugriffsprüfung, Push-Hinweis, Streak, Laden/Speichern/Löschen.
+- `1074–1665` `dailyMind()`: Login, Profil/Avatar, Zugriffsprüfung, Push-Hinweis, Streak, Laden/Speichern/Löschen,
+  Archiv-Vorschau (`archSel`, `pv()`, `pickArchive`), Tastenkürzel (`onKey`, `focusPart`).
 - Ende: Boot-Fehler-Hinweis (`#bootFail`), Service-Worker-Registrierung.
+
+## Breiten (Handy bleibt unverändert)
+- `< 768 px` Handy: Tab-Leiste unten, Profil-Tab. `768–1099 px`: eine Spalte (600 px), Segmente oben.
+- `≥ 1100 px` Rechner (`wide`, `wideMq`): `.desk` = Tagebuch + Seitenleiste `.side` (Kalender, Monat, Serie),
+  `.routines` zeigt Morgen und Abend nebeneinander (Umschalter `.parts` aus), Archiv `.arch-grid` mit Vorschau.
+- Neue Rechner-Styles nur in diesem Media-Block; Elemente dafür sind darunter per CSS ausgeblendet.
 
 ## Supabase-Anbindung
 - Gemeinsames Core-Projekt; Client: `supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)`.
