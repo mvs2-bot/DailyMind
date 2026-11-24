@@ -39,6 +39,7 @@
       --p1: #4a7356; --p1-soft: #e7f0e9; --on-p1: #fff;
       --sun: #b25000; --sun-soft: #fff1e0; --moon: var(--p1); --moon-soft: var(--p1-soft); /* Abend in Salbeigrün */
       --star: var(--sun); /* Flamme der Streak-Anzeige (shared/streak.css) */
+      --streak-ice: #0a84c6; --streak-repair: #8944ab; /* Freeze- und Reparatur-Tage */
       --ok: #248a3d; --danger: #d70015; --danger-soft: #ffe6e8;
       --radius: 18px; --radius-s: 12px; --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 14px rgba(0, 0, 0, .04);
       --pop: 0 12px 40px rgba(0, 0, 0, .18), 0 0 0 .5px rgba(0, 0, 0, .06);
@@ -53,6 +54,7 @@
       --ink: #f5f5f7; --text: #d1d1d6; --mute: #98989f;
       --p1: #8fc49c; --p1-soft: #15281a; --on-p1: #0d2614;
       --sun: #ffb340; --sun-soft: #33240b; --moon: var(--p1); --moon-soft: var(--p1-soft);
+      --streak-ice: #64d2ff; --streak-repair: #da8fff;
       --ok: #30d158; --danger: #ff6961; --danger-soft: #3a1412;
       --shadow: none; --pop: 0 16px 48px rgba(0, 0, 0, .6), 0 0 0 .5px rgba(255, 255, 255, .08);
     }
@@ -259,6 +261,15 @@
     .days button.future { opacity: .3; }
     .days .dots { display: flex; gap: 3px; height: 5px; }
     .days .dot { width: 5px; height: 5px; }
+    /* Streak im Kalender (aus streak.days): Strich über der Zahl – aktiv, Freeze, repariert */
+    .days button { position: relative; }
+    .days button[data-st]::before, .legend i { content: ""; height: 3px; border-radius: 2px; background: var(--star); }
+    .days button[data-st]::before { position: absolute; top: 5px; left: 34%; right: 34%; }
+    .days button[data-st="frozen"]::before, .legend i.frozen { background: var(--streak-ice); }
+    .days button[data-st="repaired"]::before, .legend i.repaired { background: var(--streak-repair); }
+    .legend i { display: inline-block; width: 12px; }
+    .legend.streak { margin-top: 6px; }
+    .note.repair p .ic { color: var(--streak-repair); }
     .legend { display: flex; justify-content: center; gap: 16px; margin-top: 12px; font-size: 12px; font-weight: 400; color: var(--mute); }
     .legend span { display: inline-flex; align-items: center; gap: 5px; }
 
@@ -557,6 +568,12 @@
         </div>
       </div>
 
+      <!-- Streak gerissen, aber reparierbar (shared/streak.js liefert den Text) -->
+      <div x-show="streakRepair()" x-cloak class="card note repair">
+        <p><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span x-text="streakRepair()"></span></p>
+        <div class="acts2"><button @click="Streak.detail(streak, sb)" type="button" class="btn ghost">Details</button></div>
+      </div>
+
       <!-- Datum -->
       <div class="day">
         <button @click="shiftDay(-1)" class="icon-btn" type="button" aria-label="Vorheriger Tag">
@@ -766,7 +783,7 @@
           <template x-for="cell in calendarCells()" :key="'s' + cell.key">
             <button :disabled="!cell.iso || cell.iso > today()" @click="goTo(cell.iso)" type="button"
                     :class="{ today: cell.iso === today(), has: !!cell.entry, future: cell.iso && cell.iso > today(), sel: cell.iso === date }"
-                    :aria-label="cell.iso ? longDate(cell.iso) : ''" :aria-current="cell.iso === date ? 'date' : null">
+                    :data-st="cell.st" :aria-label="cell.iso ? longDate(cell.iso) + (ST_LABEL[cell.st] || '') : ''" :aria-current="cell.iso === date ? 'date' : null">
               <span x-text="cell.day"></span>
               <span class="dots">
                 <span x-show="cell.entry?.morning_done_at" class="dot sun"></span>
@@ -774,6 +791,11 @@
               </span>
             </button>
           </template>
+        </div>
+        <div x-show="streakDays()" class="legend streak">
+          <span><i></i>Serie</span>
+          <span><i class="frozen"></i>Freeze</span>
+          <span><i class="repaired"></i>Repariert</span>
         </div>
       </div>
 
@@ -792,6 +814,8 @@
         <div class="stat-grid">
           <div><b x-text="streak?.current ?? 0"></b><span>Tage in Folge</span></div>
           <div><b x-text="streak?.best ?? 0"></b><span>Rekord</span></div>
+          <div><b x-text="(streak?.freezes ?? 0) + '/2'"></b><span>Freezes</span></div>
+          <div><b x-text="freezeNext().value"></b><span x-text="freezeNext().label"></span></div>
         </div>
       </article>
 
@@ -877,7 +901,7 @@
           <template x-for="cell in calendarCells()" :key="cell.key">
             <button :disabled="!cell.iso || cell.iso > today()" @click="pickArchive(cell.iso)" type="button"
                     :class="{ today: cell.iso === today(), has: !!cell.entry, future: cell.iso && cell.iso > today(), sel: wide && cell.iso === archSel }"
-                    :aria-label="cell.iso ? longDate(cell.iso) : ''">
+                    :data-st="cell.st" :aria-label="cell.iso ? longDate(cell.iso) + (ST_LABEL[cell.st] || '') : ''">
               <span x-text="cell.day"></span>
               <span class="dots">
                 <span x-show="cell.entry?.morning_done_at" class="dot sun"></span>
@@ -889,6 +913,11 @@
         <div class="legend">
           <span><span class="dot sun"></span>Morgen</span>
           <span><span class="dot moon"></span>Abend</span>
+        </div>
+        <div x-show="streakDays()" class="legend streak">
+          <span><i></i>Serie</span>
+          <span><i class="frozen"></i>Freeze</span>
+          <span><i class="repaired"></i>Repariert</span>
         </div>
       </div>
       </div>
@@ -983,6 +1012,17 @@
           <div><b x-text="monthStats().mood"></b><span>Stimmung im Schnitt</span></div>
         </div>
       </article>
+
+      <!-- Serie (shared/streak.js), Klick öffnet die Details -->
+      <article x-show="streak && streak.enabled" class="card prof-stats" role="button" tabindex="0" @click="Streak.detail(streak, sb)" @keydown.enter="Streak.detail(streak, sb)" style="cursor:pointer">
+        <h3>Serie</h3>
+        <div class="stat-grid">
+          <div><b x-text="streak?.current ?? 0"></b><span>Tage in Folge</span></div>
+          <div><b x-text="streak?.best ?? 0"></b><span>Rekord</span></div>
+          <div><b x-text="(streak?.freezes ?? 0) + '/2'"></b><span>Freezes</span></div>
+          <div><b x-text="freezeNext().value"></b><span x-text="freezeNext().label"></span></div>
+        </div>
+      </article>
     </section>
   </main>
 </div>
@@ -1040,6 +1080,8 @@
   });
   // Ab dieser Stunde öffnet die App direkt mit der Abendroutine
   const EVENING_FROM_HOUR = 15;
+  // Streak-Tage im Kalender (Bildschirmleser)
+  const ST_LABEL = { on: ", Serie", frozen: ", Freeze", repaired: ", Serie repariert" };
   const autoPart = () => new Date().getHours() >= EVENING_FROM_HOUR ? 'evening' : 'morning';
 
   // Sprüche stehen in sprueche.js. Pro Kalendertag rückt die Liste um einen Spruch weiter:
@@ -1296,6 +1338,14 @@
       // ------------------------------------------------------------
       // Streak: zählt auf dem Server per Trigger, sobald eine Routine gespeichert ist. Hier nur anzeigen.
       // ------------------------------------------------------------
+      streakDays() { return !!(this.streak && this.streak.enabled && this.streak.days && this.streak.days.length); },
+      streakRepair() { return this.streak && this.streak.enabled && window.Streak && Streak.repairText ? Streak.repairText(this.streak) : ''; },
+      // Nächster Freeze fürs Profil: Tage, sonst „voll“ bzw. „–“
+      freezeNext() {
+        const n = window.Streak && Streak.nextFreeze ? Streak.nextFreeze(this.streak) : null;
+        if (n) return { value: n, label: n === 1 ? 'Tag bis zum Freeze' : 'Tage bis zum Freeze' };
+        return { value: (this.streak?.freezes ?? 0) >= 2 ? 'voll' : '–', label: 'Nächster Freeze' };
+      },
       async loadStreak() {
         if (!window.Streak) return;
         try {
@@ -1465,7 +1515,9 @@
         Object.assign(this.entry, data);
         if (this.saveState === 'saving') this.saveState = 'saved';
         this.lastSync = new Date();
-        if ((data.morning_done_at || data.evening_done_at) && this.streak && !this.streak.today_done) this.loadStreak();
+        // Neu laden, wenn heute erstmals etwas zählt oder eine Reparatur offen ist (Morgen + Abend holt die Serie zurück)
+        const repairing = this.streak && this.streak.repair && !this.streak.repaired && data.morning_done_at && data.evening_done_at;
+        if ((data.morning_done_at || data.evening_done_at) && this.streak && (!this.streak.today_done || repairing)) this.loadStreak();
         this.upsertArchive({ ...row, ...data });
       },
 
@@ -1635,11 +1687,13 @@
         const days = new Date(y, m, 0).getDate();
         const offset = (first.getDay() + 6) % 7;  // Woche beginnt am Montag
         const byDate = Object.fromEntries(this.archive.map(e => [e.entry_date, e]));
+        const sd = this.streakDays() ? Object.fromEntries(this.streak.days.map(x => [x.d, x])) : {};
         const cells = [];
         for (let i = 0; i < offset; i++) cells.push({ key: 'b' + i, iso: null, day: '' });
         for (let d = 1; d <= days; d++) {
           const iso = `${this.calMonth}-${pad(d)}`;
-          cells.push({ key: iso, iso, day: d, entry: byDate[iso] });
+          const x = sd[iso];
+          cells.push({ key: iso, iso, day: d, entry: byDate[iso], st: x ? (x.r ? 'repaired' : x.f ? 'frozen' : 'on') : null });
         }
         return cells;
       },

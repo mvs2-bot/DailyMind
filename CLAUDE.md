@@ -50,15 +50,17 @@ Sprache in UI, Kommentaren, Doku und Commits: Deutsch. Ausführliche Nutzer-Doku
 - Gemeinsames Core-Projekt; Client: `supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)`.
 - **Schema liegt ausschließlich im Repo `supabase-core`** (Präfix `dailymind_`). Schemaänderung = dort neue
   Migration + Test, eigener PR. Migrationen bisher: `…_dailymind_core`, `…_dailymind_push`,
-  `…_dailymind_push_vapid`, `…_dailymind_tschick`, `…_dailymind_drinks`. Edge Function `dailymind-push`.
+  `…_dailymind_push_vapid`, `…_dailymind_tschick`, `…_dailymind_drinks`, `…_dailymind_push_streak`
+  (dazu `…_streak_repair`). Edge Function `dailymind-push`.
 - Tabellen/RPCs im Client:
   - `dailymind_entries` – ein Eintrag je User und Tag (`unique (user_id, entry_date)`). Felder:
     `gratitude[]`, `great_day[]`, `affirmation`, `morning_done_at`, `went_well[]`, `learned`, `mood 1–5`,
     `energy 1–5`, `evening_done_at`, `tschick`, `tschick_tags[]`, `drank_enough`, `drank_alcohol`.
-  - `dailymind_push_settings` – Erinnerungen (`morning_/evening_enabled` + Zeiten, `tschick_enabled`, `drinks_enabled`).
+  - `dailymind_push_settings` – Erinnerungen (`morning_/evening_/streak_enabled` + Zeiten, `tschick_enabled`, `drinks_enabled`).
   - `dailymind_push_subscriptions` – Push-Abo je Gerät (über `push.js`).
   - `overall_profiles` (Name, `avatar_path` → Storage-Bucket `avatars`), RPC `overall_app_role(p_app)`,
-    RPC `dailymind_is_member`, Streak über `Streak.status(sb, 'dailymind')`.
+    RPC `dailymind_is_member`, Streak über `Streak.status(sb, 'dailymind')`; `streak.days`
+    markiert die Kalender (aktiv/Freeze/repariert), `streak.repair` zeigt den Reparatur-Hinweis im Tagebuch.
 - Sicherheit: RLS erzwungen, jede Policy `user_id = auth.uid()`; Einträge strikt privat (auch nicht für Admins).
   Zugang ab Rolle `member` in `overall_app_access`. Konten legt nur ein Admin im Dashboard an (keine Registrierung).
 
@@ -66,7 +68,8 @@ Sprache in UI, Kommentaren, Doku und Commits: Deutsch. Ausführliche Nutzer-Doku
 - Flächen: `--bg #f2f2f7`, `--card #fff`, `--well`, `--hover`, `--line`, `--sep`.
 - Text: `--ink #1c1c1e`, `--text #3a3a3c`, `--mute #6c6c70`.
 - Akzent Salbeigrün: `--p1 #4a7356` (dunkel `#8fc49c`), `--p1-soft`, `--on-p1`.
-- Morgen: `--sun #b25000` / `--sun-soft` (dunkel `#ffb340`); Abend: `--moon` = `--p1`; Streak-Flamme `--star` = `--sun`.
+- Morgen: `--sun #b25000` / `--sun-soft` (dunkel `#ffb340`); Abend: `--moon` = `--p1`; Streak-Flamme `--star` = `--sun`,
+  Freeze `--streak-ice`, Reparatur `--streak-repair`.
 - Status: `--ok`, `--danger`, `--danger-soft`.
 - `--radius 18px`, `--radius-s 12px`, `--shadow`, `--pop`, `--font` (Systemschrift/SF),
   `--serif` (New York/Georgia – Überschriften und Affirmation).
