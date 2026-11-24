@@ -297,6 +297,62 @@
     .stuck { max-width: 380px; margin: 0 auto; text-align: center; font-size: 13px; color: var(--mute); }
     .stuck .btn { margin-top: 12px; }
 
+    /* Rechner (ab 1100 px): Morgen + Abend nebeneinander, Seitenleiste, Archiv mit Vorschau.
+       Alles Neue ist darunter ausgeblendet, Handy und Tablet bleiben wie bisher. */
+    .side, .col-head, .arch-prev { display: none; }
+    .days button.sel { background: var(--p1); color: var(--on-p1); }
+    .days button.sel .dot { background: var(--on-p1); }
+    .side .cal { margin-top: 0; }
+    .side .days button { font-size: 13px; border-radius: 8px; }
+    .side .stat-grid b { font-size: 19px; }
+    .side .link { justify-self: center; display: inline-flex; align-items: center; gap: 6px; color: var(--mute); font-weight: 500; }
+    .pv-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .pv-head h2 { font-family: var(--serif); font-size: 20px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); line-height: 1.2; }
+    .pv-sec { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--sep); }
+    .pv-t { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink); }
+    .pv-t .ic { width: 16px; height: 16px; }
+    .pv-sec.sun .pv-t .ic { color: var(--sun); } .pv-sec.moon .pv-t .ic { color: var(--moon); }
+    .pv-sec h4 { margin: 12px 0 4px; font-size: 12px; font-weight: 600; color: var(--mute); }
+    .pv-sec ol { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink); }
+    .pv-sec ol li + li { margin-top: 2px; }
+    .pv-v { font-size: 14px; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .pv-v.q { font-family: var(--serif); font-style: italic; font-size: 15px; }
+    .pv-empty { margin-top: 6px; font-size: 13px; color: var(--mute); }
+    .pv-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .pv-chips span { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; background: var(--well); font-size: 12px; font-weight: 500; color: var(--ink); }
+    .pv-chips .ic { width: 15px; height: 15px; }
+
+    /* Tastenkürzel-Übersicht (Taste ?) */
+    .keys-bg { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, .32); }
+    .keys { width: 100%; max-width: 400px; box-shadow: var(--pop); }
+    .keys .icon-btn { margin-left: auto; width: 30px; height: 30px; background: var(--well); box-shadow: none; }
+    .keys dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; margin: 14px 0 0; font-size: 13px; }
+    .keys dt { white-space: nowrap; color: var(--mute); }
+    .keys dd { margin: 0; color: var(--text); }
+    kbd { display: inline-block; min-width: 22px; padding: 2px 6px; border-radius: 6px; background: var(--well); box-shadow: inset 0 -1px 0 var(--line);
+      font: 600 12px/1.4 var(--font); color: var(--ink); text-align: center; }
+
+    @media (min-width: 1100px) {
+      .wrap { max-width: 1240px; padding-inline: 32px; }
+      .desk { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 24px; align-items: start; }
+      .side { display: grid; gap: 12px; position: sticky; top: 76px; }
+      .parts { display: none; }
+      .routines { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; margin-top: 18px; }
+      .routines > .stack { margin-top: 0; }
+      .col-head { display: flex; align-items: center; gap: 7px; padding: 0 4px; font-size: 13px; font-weight: 600; color: var(--ink); }
+      .col-head .ic { width: 16px; height: 16px; }
+      .col-head.sun .ic { color: var(--sun); } .col-head.moon .ic { color: var(--moon); }
+      /* Eingaben etwas großzügiger als am Handy */
+      .card { padding: 18px 20px; }
+      .card h3 { font-size: 16px; }
+      .field { font-size: 16px; }
+      .affirm { font-size: 18px; }
+      .arch-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+      .arch-prev { display: block; position: sticky; top: 76px; margin-top: 14px; }
+      .entry.sel .open { background: var(--p1-soft); }
+      .arch-grid .days button { aspect-ratio: auto; height: 52px; }
+    }
+
     /* Untere Tab-Leiste: NUR auf dem Handy (< 768 px). Darüber bleibt alles wie bisher. */
     .tabbar { display: none; }
     @media (max-width: 767.98px) {
@@ -487,6 +543,8 @@
       <button @click="openArchive()" :aria-pressed="tab === 'archive'" type="button">Archiv</button>
     </nav>
 
+    <!-- Ab 1100 px: Tagebuch links, Überblick rechts -->
+    <div class="desk">
     <!-- -------------------------- Tagebuch -------------------------- -->
     <section x-show="tab === 'today'" class="fade-enter">
 
@@ -528,8 +586,11 @@
 
       <div x-show="loadingEntry" class="spin"></div>
 
+      <!-- Am Rechner stehen beide Routinen nebeneinander, sonst schaltet der Umschalter oben -->
+      <div class="routines">
       <!-- Morgenroutine -->
-      <div x-show="!loadingEntry && part === 'morning'" class="stack fade-enter">
+      <div x-show="!loadingEntry && (wide || part === 'morning')" class="stack fade-enter" data-part="morning">
+        <p class="col-head sun"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>Morgen <span x-show="entry.morning_done_at" class="dot sun" title="ausgefüllt"></span></p>
         <article class="card">
           <div class="card-head">
             <span class="badge-ic sun"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12.6 12 20l-7.5-7.4a4.6 4.6 0 0 1 7.5-5.3 4.6 4.6 0 0 1 7.5 5.3z"/></svg></span>
@@ -572,10 +633,21 @@
             <textarea rows="2" maxlength="500" x-model="entry.affirmation" @input="queueSave()" class="field affirm" placeholder="Ich bin ruhig, klar und offen für das, was kommt." aria-label="Positive Affirmation"></textarea>
           </div>
         </article>
+        <!-- Kompliment, sobald alle Felder der Routine ausgefüllt sind -->
+        <div x-show="complete('morning')" x-cloak x-transition.opacity.duration.500ms class="card praise">
+          <span class="badge-ic sun">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8zM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
+          </span>
+          <div>
+            <b x-text="compliment('morning').title"></b>
+            <span x-text="compliment('morning').text"></span>
+          </div>
+        </div>
       </div>
 
       <!-- Abendroutine -->
-      <div x-show="!loadingEntry && part === 'evening'" x-cloak class="stack fade-enter">
+      <div x-show="!loadingEntry && (wide || part === 'evening')" x-cloak class="stack fade-enter" data-part="evening">
+        <p class="col-head moon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Abend <span x-show="entry.evening_done_at" class="dot moon" title="ausgefüllt"></span></p>
         <article class="card">
           <div class="card-head">
             <span class="badge-ic moon"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
@@ -662,23 +734,70 @@
             </template>
           </details>
         </article>
-      </div>
-
-      <!-- Kompliment, sobald alle Felder der Routine ausgefüllt sind -->
-      <div x-show="!loadingEntry && complete(part)" x-cloak x-transition.opacity.duration.500ms class="card praise" style="margin-top: 12px">
-        <span class="badge-ic" :class="part === 'morning' ? 'sun' : 'moon'">
-          <svg x-show="part === 'morning'" class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8zM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
-          <svg x-show="part === 'evening'" class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9zM19 3v4M21 5h-4"/></svg>
-        </span>
-        <div>
-          <b x-text="compliment(part).title"></b>
-          <span x-text="compliment(part).text"></span>
+        <!-- Kompliment, sobald alle Felder der Routine ausgefüllt sind -->
+        <div x-show="complete('evening')" x-cloak x-transition.opacity.duration.500ms class="card praise">
+          <span class="badge-ic moon">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9zM19 3v4M21 5h-4"/></svg>
+          </span>
+          <div>
+            <b x-text="compliment('evening').title"></b>
+            <span x-text="compliment('evening').text"></span>
+          </div>
         </div>
+      </div>
       </div>
 
       <!-- Speicherstatus -->
       <p class="status" :class="saveState === 'error' && 'err'" x-text="saveStatus()" aria-live="polite"></p>
     </section>
+
+    <!-- Überblick (nur Rechner): Kalender zum Springen, Monat, Serie -->
+    <aside x-show="wide && tab === 'today'" x-cloak class="side" aria-label="Überblick">
+      <div class="card cal">
+        <div class="cal-head">
+          <button @click="shiftMonth(-1)" class="icon-btn" type="button" aria-label="Vorheriger Monat"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+          <b x-text="monthLabel(calMonth)"></b>
+          <button @click="shiftMonth(1)" :disabled="calMonth >= today().slice(0, 7)" class="icon-btn" type="button" aria-label="Nächster Monat"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </div>
+        <div class="wk">
+          <template x-for="d in ['Mo','Di','Mi','Do','Fr','Sa','So']"><span x-text="d"></span></template>
+        </div>
+        <div class="days">
+          <template x-for="cell in calendarCells()" :key="'s' + cell.key">
+            <button :disabled="!cell.iso || cell.iso > today()" @click="goTo(cell.iso)" type="button"
+                    :class="{ today: cell.iso === today(), has: !!cell.entry, future: cell.iso && cell.iso > today(), sel: cell.iso === date }"
+                    :aria-label="cell.iso ? longDate(cell.iso) : ''" :aria-current="cell.iso === date ? 'date' : null">
+              <span x-text="cell.day"></span>
+              <span class="dots">
+                <span x-show="cell.entry?.morning_done_at" class="dot sun"></span>
+                <span x-show="cell.entry?.evening_done_at" class="dot moon"></span>
+              </span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <article class="card prof-stats">
+        <h3 x-text="monthLabel(calMonth)"></h3>
+        <div class="stat-grid">
+          <div><b x-text="monthStats(calMonth).days"></b><span>Tage mit Eintrag</span></div>
+          <div><b x-text="monthStats(calMonth).mood"></b><span>Stimmung im Schnitt</span></div>
+          <div><b x-text="monthStats(calMonth).morning"></b><span>Morgenroutinen</span></div>
+          <div><b x-text="monthStats(calMonth).evening"></b><span>Abendroutinen</span></div>
+        </div>
+      </article>
+
+      <article x-show="streak && streak.enabled" class="card prof-stats">
+        <h3>Serie</h3>
+        <div class="stat-grid">
+          <div><b x-text="streak?.current ?? 0"></b><span>Tage in Folge</span></div>
+          <div><b x-text="streak?.best ?? 0"></b><span>Rekord</span></div>
+        </div>
+      </article>
+
+      <button @click="keysOpen = true" type="button" class="link">Tastenkürzel <kbd>?</kbd></button>
+    </aside>
+    </div>
 
     <!-- --------------------------- Archiv --------------------------- -->
     <section x-show="tab === 'archive'" x-cloak class="fade-enter">
@@ -694,6 +813,9 @@
 
       <p x-show="!archiveLoading && archive.length === 0" class="empty">Noch keine Einträge. Dein erster wartet unter „Tagebuch“.</p>
 
+      <!-- Am Rechner: links Liste/Kalender, rechts Vorschau des gewählten Eintrags -->
+      <div class="arch-grid">
+      <div>
       <!-- Liste -->
       <div x-show="!archiveLoading && archiveMode === 'list'">
         <template x-for="group in archiveByMonth()" :key="group.key">
@@ -701,9 +823,9 @@
             <p class="group-label" x-text="group.label"></p>
             <div class="card list">
               <template x-for="e in group.entries" :key="e.id">
-                <div class="entry">
+                <div class="entry" :class="wide && archSel === e.entry_date && 'sel'">
                   <div class="line">
-                    <button @click="goTo(e.entry_date)" type="button" class="open">
+                    <button @click="pickArchive(e.entry_date)" type="button" class="open">
                       <span class="txt">
                         <span class="date" x-text="shortDate(e.entry_date)"></span>
                         <span x-show="e.affirmation" class="snip q" x-text="'„' + e.affirmation + '“'"></span>
@@ -753,8 +875,8 @@
         </div>
         <div class="days">
           <template x-for="cell in calendarCells()" :key="cell.key">
-            <button :disabled="!cell.iso || cell.iso > today()" @click="goTo(cell.iso)" type="button"
-                    :class="{ today: cell.iso === today(), has: !!cell.entry, future: cell.iso && cell.iso > today() }"
+            <button :disabled="!cell.iso || cell.iso > today()" @click="pickArchive(cell.iso)" type="button"
+                    :class="{ today: cell.iso === today(), has: !!cell.entry, future: cell.iso && cell.iso > today(), sel: wide && cell.iso === archSel }"
                     :aria-label="cell.iso ? longDate(cell.iso) : ''">
               <span x-text="cell.day"></span>
               <span class="dots">
@@ -768,6 +890,54 @@
           <span><span class="dot sun"></span>Morgen</span>
           <span><span class="dot moon"></span>Abend</span>
         </div>
+      </div>
+      </div>
+
+      <!-- Vorschau (nur Rechner) -->
+      <article x-show="wide && !archiveLoading && pv()" x-cloak class="card arch-prev" aria-live="polite">
+        <template x-if="pv()">
+          <div>
+            <div class="pv-head">
+              <div>
+                <p class="eyebrow" x-text="weekday(pv().entry_date)"></p>
+                <h2 x-text="longDate(pv().entry_date) + ' ' + pv().entry_date.slice(0, 4)"></h2>
+              </div>
+              <button @click="goTo(pv().entry_date)" type="button" class="btn ghost">Bearbeiten</button>
+            </div>
+
+            <div class="pv-sec sun">
+              <p class="pv-t"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>Morgen</p>
+              <p x-show="!pv().morning_done_at" class="pv-empty">Nicht ausgefüllt.</p>
+              <template x-if="pv().gratitude?.length">
+                <div><h4>Dankbar für</h4><ol><template x-for="(t, i) in pv().gratitude" :key="i"><li x-text="t"></li></template></ol></div>
+              </template>
+              <template x-if="pv().great_day?.length">
+                <div><h4>Das macht den Tag großartig</h4><ol><template x-for="(t, i) in pv().great_day" :key="i"><li x-text="t"></li></template></ol></div>
+              </template>
+              <template x-if="pv().affirmation">
+                <div><h4>Affirmation</h4><p class="pv-v q" x-text="'„' + pv().affirmation + '“'"></p></div>
+              </template>
+            </div>
+
+            <div class="pv-sec moon">
+              <p class="pv-t"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Abend</p>
+              <p x-show="!pv().evening_done_at" class="pv-empty">Nicht ausgefüllt.</p>
+              <template x-if="pv().went_well?.length">
+                <div><h4>Lief gut</h4><ol><template x-for="(t, i) in pv().went_well" :key="i"><li x-text="t"></li></template></ol></div>
+              </template>
+              <template x-if="pv().learned">
+                <div><h4>Gutes getan</h4><p class="pv-v" x-text="pv().learned"></p></div>
+              </template>
+              <div class="pv-chips" x-show="pv().mood || pv().energy || (drinksOn && (pv().drank_enough != null || pv().drank_alcohol)) || (tschickOn && pv().tschick != null)">
+                <span x-show="pv().mood"><span x-html="moodIcon(pv().mood)" style="display:contents"></span><span x-text="moods.find(m => m.value === pv().mood)?.label"></span></span>
+                <span x-show="pv().energy" x-text="'Energie: ' + energyLabels[(pv().energy || 1) - 1]"></span>
+                <span x-show="drinksOn && (pv().drank_enough != null || pv().drank_alcohol)" x-text="'Getrunken: ' + drinkLabel(pv())"></span>
+                <span x-show="tschickOn && pv().tschick != null" x-text="'Tschick: ' + tschickLabel(pv().tschick ?? 0)"></span>
+              </div>
+            </div>
+          </div>
+        </template>
+      </article>
       </div>
     </section>
 
@@ -825,6 +995,25 @@
     <span class="pm-ava bar-ava" :style="'background:' + me.color"><template x-if="me.photo"><img :src="me.photo" alt=""></template><span x-show="!me.photo" x-text="me.initials"></span><span class="sync-dot" :class="syncLevel()"></span></span>Profil</button>
 </nav>
 
+<!-- Tastenkürzel (Taste ?) -->
+<div class="keys-bg" x-show="keysOpen" x-cloak x-transition.opacity.duration.150ms @click.self="keysOpen = false">
+  <div class="card keys" role="dialog" aria-modal="true" aria-labelledby="keysTitle">
+    <div class="card-head">
+      <h3 id="keysTitle">Tastenkürzel</h3>
+      <button x-ref="keysClose" @click="keysOpen = false" type="button" class="icon-btn" aria-label="Schließen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <dl>
+      <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Vorheriger / nächster Tag, im Archiv voriger / nächster Eintrag</dd>
+      <dt><kbd>H</kbd></dt><dd>Zu heute</dd>
+      <dt><kbd>M</kbd> <kbd>A</kbd></dt><dd>In die Morgen- bzw. Abendroutine schreiben</dd>
+      <dt><kbd>1</kbd> <kbd>2</kbd></dt><dd>Tagebuch / Archiv</dd>
+      <dt><kbd>Strg</kbd> <kbd>S</kbd></dt><dd>Sofort speichern</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Textfeld verlassen, danach greifen die Kürzel</dd>
+      <dt><kbd>?</kbd></dt><dd>Diese Übersicht</dd>
+    </dl>
+  </div>
+</div>
+
 <script>
   // ================================================================
   // Hilfsfunktionen für Datum (immer lokale Zeit, nie UTC)
@@ -864,6 +1053,7 @@
   // Hängt eine Abfrage (schwaches Netz, App aus dem Hintergrund), gilt sie nach ms als Netzfehler
   const withTimeout = (p, ms) => Promise.race([Promise.resolve(p), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
   const mobileMq = matchMedia('(max-width: 767.98px)');
+  const wideMq = matchMedia('(min-width: 1100px)');  // Rechner: zwei Spalten, Seitenleiste, Archiv-Vorschau
 
   const padTo3 = a => [...(a || []), '', '', ''].slice(0, 3);
   const clean = a => a.map(s => s.trim()).filter(Boolean);
@@ -903,6 +1093,8 @@
 
       // Tagebuch
       tab: 'today',
+      wide: wideMq.matches,
+      keysOpen: false,
       part: autoPart(),
       now: new Date(),
       date: toISO(new Date()),
@@ -920,6 +1112,7 @@
       archiveLoading: false,
       archiveMode: 'calendar',    // calendar | list – beim Öffnen immer Kalender
       confirmDelete: null,        // id des Eintrags mit offener Sicherheitsabfrage
+      archSel: null,              // Datum des Eintrags in der Vorschau (nur Rechner)
       deleting: false,
       calMonth: toISO(new Date()).slice(0, 7),
 
@@ -935,8 +1128,8 @@
       tschickOn: false,
       // TrinkTracking (Schalter in den Kontoeinstellungen, Standard aus)
       drinksOn: false,
-      drinkLabel() {
-        const e = this.entry, p = [];
+      drinkLabel(e = this.entry) {
+        const p = [];
         if (e.drank_enough === false) p.push('Leider, nein');
         if (e.drank_enough === true) p.push('Ja, klar doch');
         if (e.drank_alcohol) p.push('+alkoholisch');
@@ -975,6 +1168,9 @@
         try { const t = sessionStorage.getItem('dailymind-tab'); if (t === 'archive' || (mobileMq.matches && t === 'profile')) this.restoreTab = t; } catch (_) {}
         this.$watch('tab', t => { try { sessionStorage.setItem('dailymind-tab', t); } catch (_) {} });
         mobileMq.addEventListener('change', e => { if (!e.matches && this.tab === 'profile') this.tab = 'today'; });
+        wideMq.addEventListener('change', e => { this.wide = e.matches; if (e.matches && this.view === 'app') this.loadArchive(); });
+        window.addEventListener('keydown', e => this.onKey(e));
+        this.$watch('keysOpen', v => { if (v) this.$nextTick(() => this.$refs.keysClose.focus()); });
 
         this.sb.auth.onAuthStateChange((event, session) => {
           if (event === 'PASSWORD_RECOVERY') {
@@ -1087,6 +1283,7 @@
           this.view = 'app';
           if (this.restoreTab) { const t = this.restoreTab; this.restoreTab = null; t === 'archive' ? this.openArchive() : this.openProfile(); }
           this.part = autoPart();
+          if (this.wide && this.tab === 'today') this.loadArchive();  // für Kalender und Monat in der Seitenleiste
           this.checkPushHint();
           this.loadTschickSetting();
           this.loadStreak();
@@ -1290,6 +1487,7 @@
       async goTo(iso) {
         if (this.saveState === 'pending') await this.save();
         this.date = iso;
+        this.calMonth = iso.slice(0, 7);
         this.tab = 'today';
         window.scrollTo({ top: 0, behavior: 'smooth' });
         await this.loadEntry();
@@ -1309,8 +1507,8 @@
         window.scrollTo({ top: 0 });
         this.loadArchive();  // für die Monatsstatistik
       },
-      monthStats() {
-        const m = this.today().slice(0, 7), list = this.archive.filter(e => e.entry_date.startsWith(m));
+      monthStats(m = this.today().slice(0, 7)) {
+        const list = this.archive.filter(e => e.entry_date.startsWith(m));
         const moods = list.map(e => e.mood).filter(Boolean);
         const avg = moods.length ? moods.reduce((a, b) => a + b, 0) / moods.length : 0;
         return {
@@ -1330,13 +1528,58 @@
         window.scrollTo({ top: 0 });
         this.archiveMode = 'calendar';
         this.confirmDelete = null;
+        this.archSel = this.date;
         await this.loadArchive();
+        if (!this.pv()) this.archSel = this.archive[0]?.entry_date || null;
+      },
+      // Am Rechner zeigt ein Klick den Eintrag in der Vorschau, sonst (oder ohne Eintrag) öffnet er den Tag
+      pickArchive(iso) {
+        if (this.wide && this.archive.some(a => a.entry_date === iso)) { this.archSel = iso; this.confirmDelete = null; }
+        else this.goTo(iso);
+      },
+      pv() { return this.archSel ? this.archive.find(a => a.entry_date === this.archSel) || null : null; },
+      // Archiv-Vorschau mit ←/→ durchblättern (Liste ist neueste zuerst)
+      stepArchive(n) {
+        if (!this.wide) return;
+        const next = this.archive[this.archive.findIndex(a => a.entry_date === this.archSel) + n];
+        if (next) { this.archSel = next.entry_date; this.calMonth = next.entry_date.slice(0, 7); }
+      },
+
+      // ------------------------------------------------------------
+      // Tastenkürzel (Übersicht mit ?)
+      // ------------------------------------------------------------
+      onKey(e) {
+        if (this.view !== 'app') return;
+        const k = e.key;
+        // Strg/Cmd+S speichert sofort, auch mitten im Textfeld
+        if ((e.ctrlKey || e.metaKey) && k.toLowerCase() === 's') { e.preventDefault(); if (this.tab === 'today' && this.saveState === 'pending') this.save(); return; }
+        if (this.keysOpen) { if (k === 'Escape' || k === '?') { e.preventDefault(); this.keysOpen = false; } return; }
+        if (e.target.closest?.('input, textarea, select, [contenteditable]')) { if (k === 'Escape') e.target.blur(); return; }
+        if (e.ctrlKey || e.metaKey || e.altKey || this.menuOpen || this.confirmDelete) return;
+        const act = {
+          ArrowLeft: () => this.tab === 'today' ? this.shiftDay(-1) : this.tab === 'archive' && this.stepArchive(1),
+          ArrowRight: () => this.tab === 'today' ? this.shiftDay(1) : this.tab === 'archive' && this.stepArchive(-1),
+          h: () => { if (this.tab !== 'today' || this.date !== this.today()) this.goTo(this.today()); },
+          m: () => this.focusPart('morning'),
+          a: () => this.focusPart('evening'),
+          1: () => this.openToday(),
+          2: () => this.openArchive(),
+          '?': () => { this.keysOpen = true; },
+        }[k.length === 1 ? k.toLowerCase() : k];
+        if (!act) return;
+        e.preventDefault();
+        act();
+      },
+      focusPart(p) {
+        if (this.tab !== 'today') this.openToday();
+        this.part = p;
+        this.$nextTick(() => document.querySelector(`[data-part="${p}"] textarea`)?.focus());
       },
       async loadArchive() {
         this.archiveLoading = this.archive.length === 0;
         const { data, error } = await this.sb
           .from('dailymind_entries')
-          .select('id, entry_date, gratitude, great_day, affirmation, went_well, mood, energy, morning_done_at, evening_done_at')
+          .select('*')  // alle Felder, damit die Archiv-Vorschau am Rechner den ganzen Tag zeigt
           .order('entry_date', { ascending: false })
           .limit(1000);
         this.archiveLoading = false;
@@ -1362,6 +1605,7 @@
         if (error || !data?.length) { console.error(error); alert('Löschen hat nicht geklappt. Bitte versuch es noch einmal.'); return; }
         this.confirmDelete = null;
         this.archive = this.archive.filter(a => a.id !== e.id);
+        if (this.archSel === e.entry_date) this.archSel = this.archive[0]?.entry_date || null;
         // Ist der Tag gerade im Tagebuch geöffnet, dort ebenfalls leeren
         if (this.date === e.entry_date) { this.entry = emptyEntry(); this.saveState = 'idle'; }
       },
